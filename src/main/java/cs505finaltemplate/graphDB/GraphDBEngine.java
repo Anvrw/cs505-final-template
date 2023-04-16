@@ -15,6 +15,8 @@ import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResult;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
+import com.google.gson.Gson;
+
 public class GraphDBEngine {
 
     private String databaseName;
@@ -50,30 +52,12 @@ public class GraphDBEngine {
             db.createEdgeClass("contact_with");
         }
 
-
-        OVertex patient_0 = createPatient(db, "mrn_0");
-        OVertex patient_1 = createPatient(db, "mrn_1");
-        OVertex patient_2 = createPatient(db, "mrn_2");
-        OVertex patient_3 = createPatient(db, "mrn_3");
-
-        //patient 0 in contact with patient 1
-        OEdge edge1 = patient_0.addEdge(patient_1, "contact_with");
-        edge1.save();
-        //patient 2 in contact with patient 0
-        OEdge edge2 = patient_2.addEdge(patient_0, "contact_with");
-        edge2.save();
-
-        //you should not see patient_3 when trying to find contacts of patient 0
-        OEdge edge3 = patient_3.addEdge(patient_2, "contact_with");
-        edge3.save();
-
-        getContacts(db, "mrn_0");
-
         db.close();
         orient.close();
 
     }
 
+    //Only used in the /reset function as a part of the API
     public void resetDB(){
         OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
 
@@ -84,10 +68,54 @@ public class GraphDBEngine {
         database.close();
     }
 
+    //general case to add a patient
     public void addPatient(PatientData newPatient){
+        
+        ODatabaseSession database;
+        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, "root", "rootpwd");
+        String query = "SELECT FROM patient WHERE patient_mrn = ?";
+        OResultSet result = database.query(query, newPatient.patient_mrn);
 
+        if(!result.hasNext()){
+            OVertex PatientBuffer = database.newVertex("patient");
+            PatientBuffer.setProperty("testing_id", newPatient.testing_id);
+            PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
+            PatientBuffer.setProperty("patient_name", newPatient.patient_name);
+            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
+            PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
+            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
+            PatientBuffer.setProperty("contact_list", newPatient.contact_list);
+            PatientBuffer.setProperty("event_list", newPatient.event_list);
+            PatientBuffer.setProperty("hospital_status",0);
+            PatientBuffer.save();
+        }
+
+        else if (result.next().isVertex()){
+            OVertex PatientBuffer = result.next().getVertex().get();
+            PatientBuffer.setProperty("testing_id", newPatient.testing_id);
+            PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
+            PatientBuffer.setProperty("patient_name", newPatient.patient_name);
+            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
+            PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
+            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
+            PatientBuffer.setProperty("contact_list", newPatient.contact_list);
+            PatientBuffer.setProperty("event_list", newPatient.event_list);
+            PatientBuffer.setProperty("hospital_status",0);
+            PatientBuffer.save();
+        }
+        
+        orient.close();
     }
 
+    //Incase of a random json string
+    public void addPatient(String jsoString){
+        Gson gson = new Gson();
+        PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
+        addPatient(newPatient);
+    }
+
+    //Default, keep this way
     private OVertex createPatient(ODatabaseSession db, String patient_mrn) {
         OVertex result = db.newVertex("patient");
         result.setProperty("patient_mrn", patient_mrn);

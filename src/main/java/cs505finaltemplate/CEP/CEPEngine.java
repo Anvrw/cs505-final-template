@@ -1,6 +1,7 @@
 package cs505finaltemplate.CEP;
 
 import com.google.gson.Gson;
+import cs505finaltemplate.Launcher;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.output.sink.InMemorySink;
@@ -92,6 +93,17 @@ public class CEPEngine {
             }
 
         } catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void resetDB() {
+        try {
+            
+            Launcher.alertlist.clear();
+            Launcher.lastCEPOutput = "{}";
+
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
