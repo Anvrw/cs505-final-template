@@ -54,6 +54,124 @@ public class API {
         }
         return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
     }
+    
+    @GET
+    @Path("/reset")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response reset() {
+        String responseString = "{}";
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("","");
+            responseString = gson.toJson(responseMap);
+        }
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/zipalertlist")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response zipalertlist() {
+        String responseString = "{}";
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("","");
+            responseString = gson.toJson(responseMap);
+        }
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/alertlist")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response alertlist() {
+        String responseString = "{}";
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("","");
+            responseString = gson.toJson(responseMap);
+        }
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/getconfirmedcontacts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getconfirmedcontacts() {
+        String responseString = "{}";
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("","");
+            responseString = gson.toJson(responseMap);
+        }
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/getpossiblecontacts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getpossiblecontacts() {
+        String responseString = "{}";
+        try{}
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/getpatientstatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getpatientstatus() {
+        String responseString = "{}";
+        try{}
+        catch (Exception ex){
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
 
     @GET
     @Path("/getlastcep")
