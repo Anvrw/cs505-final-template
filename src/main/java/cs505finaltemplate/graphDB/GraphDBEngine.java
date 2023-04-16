@@ -1,6 +1,11 @@
+
 package cs505finaltemplate.graphDB;
 
+import cs505finaltemplate.Topics.PatientData;
+
+
 import com.orientechnologies.orient.core.db.ODatabaseSession;
+import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OrientDB;
 import com.orientechnologies.orient.core.db.OrientDBConfig;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
@@ -12,9 +17,9 @@ import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 public class GraphDBEngine {
 
+    private String databaseName;
 
-    //!!! CODE HERE IS FOR EXAMPLE ONLY, YOU MUST CHECK AND MODIFY!!!
-    public GraphDBEngine() {
+    public GraphDBEngine(String databaseName) {
 
         //launch a docker container for orientdb, don't expect your data to be saved unless you configure a volume
         //docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=rootpwd orientdb:3.0.0
@@ -22,9 +27,10 @@ public class GraphDBEngine {
         //use the orientdb dashboard to create a new database
         //see class notes for how to use the dashboard
 
-
-        OrientDB orient = new OrientDB("remote:localhost", OrientDBConfig.defaultConfig());
-        ODatabaseSession db = orient.open("test", "root", "rootpwd");
+        this.databaseName = databaseName;
+        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        orient.create(databaseName, ODatabaseType.PLOCAL);
+        ODatabaseSession db = orient.open(databaseName, "root", "rootpwd");
 
         clearDB(db);
 
@@ -68,6 +74,20 @@ public class GraphDBEngine {
 
     }
 
+    public void resetDB(){
+        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+
+        if(database.exists(databaseName)){
+            database.drop(databaseName);
+        }
+        database.create(databaseName, ODatabaseType.PLOCAL);
+        database.close();
+    }
+
+    public void addPatient(PatientData newPatient){
+
+    }
+
     private OVertex createPatient(ODatabaseSession db, String patient_mrn) {
         OVertex result = db.newVertex("patient");
         result.setProperty("patient_mrn", patient_mrn);
@@ -92,8 +112,10 @@ public class GraphDBEngine {
 
     private void clearDB(ODatabaseSession db) {
 
-        String query = "DELETE VERTEX FROM patient";
-        db.command(query);
+
+        
+        db.command("DELETE VERTEX FROM patient");
+        
 
     }
 

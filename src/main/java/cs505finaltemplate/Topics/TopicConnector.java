@@ -20,7 +20,7 @@ public class TopicConnector {
     private Gson gson;
 
     final Type typeOfListMap = new TypeToken<List<Map<String,String>>>(){}.getType();
-    final Type typeListTestingData = new TypeToken<List<TestingData>>(){}.getType();
+    final Type typeListTestingData = new TypeToken<List<PatientData>>(){}.getType();
 
     //private String EXCHANGE_NAME = "patient_data";
     Map<String,String> config;
@@ -76,8 +76,8 @@ public class TopicConnector {
                 String message = new String(delivery.getBody(), "UTF-8");
 
 
-                List<TestingData> incomingList = gson.fromJson(message, typeListTestingData);
-                for (TestingData testingData : incomingList) {
+                List<PatientData> incomingList = gson.fromJson(message, typeListTestingData);
+                for (PatientData testingData : incomingList) {
 
                     //Data to send to CEP
                     Map<String,String> zip_entry = new HashMap<>();

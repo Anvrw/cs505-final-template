@@ -36,8 +36,8 @@ public class API {
         try {
             System.out.println("WHAT");
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("team_name", "templateTeam");
-            responseMap.put("Team_members_sids", "[0]");
+            responseMap.put("team_name", "Persuasive Trees");
+            responseMap.put("Team_members_sids", "[912297061,912267407]");
             responseMap.put("app_status_code","0");
 
             responseString = gson.toJson(responseMap);
@@ -54,7 +54,7 @@ public class API {
         }
         return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
     }
-    
+
     @GET
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
