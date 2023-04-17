@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Launcher {
@@ -23,6 +25,7 @@ public class Launcher {
     public static final int WEB_PORT = 8082;
 
     public static String lastCEPOutput = "{}";
+    public static List<Integer> alertlist = new ArrayList<Integer>();
 
     public static void main(String[] args) throws IOException {
 

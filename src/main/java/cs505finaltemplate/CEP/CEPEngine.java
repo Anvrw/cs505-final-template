@@ -10,6 +10,8 @@ import io.siddhi.core.util.transport.InMemoryBroker;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class CEPEngine {
 
@@ -97,14 +99,16 @@ public class CEPEngine {
         }
     }
 
-    public void resetDB() {
+    public boolean resetDB() {
         try {
             
             Launcher.alertlist.clear();
             Launcher.lastCEPOutput = "{}";
+            return true;
 
         } catch (Exception ex) {
             ex.printStackTrace();
+            return false;
         }
     }
 

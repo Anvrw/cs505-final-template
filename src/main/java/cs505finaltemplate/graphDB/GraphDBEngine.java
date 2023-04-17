@@ -3,6 +3,8 @@ package cs505finaltemplate.graphDB;
 
 import cs505finaltemplate.Topics.PatientData;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
 import com.orientechnologies.orient.core.db.ODatabaseType;
@@ -58,18 +60,27 @@ public class GraphDBEngine {
     }
 
     //Only used in the /reset function as a part of the API
-    public void resetDB(){
-        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+    public boolean resetDB(){
+        try{
+            OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
 
-        if(database.exists(databaseName)){
-            database.drop(databaseName);
+            if(database.exists(databaseName)){
+                database.drop(databaseName);
+            }
+            database.create(databaseName, ODatabaseType.PLOCAL);
+            database.close();
+            return true;
         }
-        database.create(databaseName, ODatabaseType.PLOCAL);
-        database.close();
+        catch(Exception e){
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            e.printStackTrace();
+            return false;
+        }
     }
 
     //general case to add a patient
-    public void addPatient(PatientData newPatient){
+    public void setPatient(PatientData newPatient){
         
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
@@ -109,18 +120,10 @@ public class GraphDBEngine {
     }
 
     //Incase of a random json string
-    public void addPatient(String jsoString){
+    public void createPatientJson(String jsoString){
         Gson gson = new Gson();
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
-        addPatient(newPatient);
-    }
-
-    //Default, keep this way
-    private OVertex createPatient(ODatabaseSession db, String patient_mrn) {
-        OVertex result = db.newVertex("patient");
-        result.setProperty("patient_mrn", patient_mrn);
-        result.save();
-        return result;
+        setPatient(newPatient);
     }
 
     private void getContacts(ODatabaseSession db, String patient_mrn) {

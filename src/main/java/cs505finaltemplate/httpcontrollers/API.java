@@ -62,11 +62,11 @@ public class API {
         String responseString = "{}";
         try{
 
-            Launcher.graphDBEngine.resetDB();
-            Launcher.cepEngine.resetDB();
+            boolean resGraph = Launcher.graphDBEngine.resetDB();
+            boolean resCEP = Launcher.cepEngine.resetDB();
 
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("reset","1");
+            responseMap.put("reset",String.valueOf(resCEP&&resGraph));
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
