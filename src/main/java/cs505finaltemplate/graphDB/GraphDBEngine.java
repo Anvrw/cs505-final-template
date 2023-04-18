@@ -172,7 +172,7 @@ public class GraphDBEngine {
         setPatient(newPatient);
     }
 
-        //general case to add a hospital
+    //general case to add a hospital
     public void setHospital(HospitalData newhospital){
         
         ODatabaseSession database;
@@ -233,6 +233,42 @@ public class GraphDBEngine {
         Gson gson = new Gson();
         HospitalData newhospital = gson.fromJson(jsoString, HospitalData.class);
         setHospital(newhospital);
+    }
+
+
+    //general case to add a vaccine
+    public void setvaccine(VaccineData newvaccine){
+        
+        ODatabaseSession database;
+        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, "root", "rootpwd");
+        String query = "SELECT FROM vaccine WHERE vaccine_mrn = ?";
+        OResultSet result = database.query(query, newvaccine.patient_mrn);
+
+        if(!result.hasNext()){
+            OVertex vaccineBuffer = database.newVertex("vaccine");
+            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
+            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
+            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
+            vaccineBuffer.save();
+        }
+
+        else if (result.next().isVertex()){
+            OVertex vaccineBuffer = result.next().getVertex().get();
+            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
+            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
+            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
+            vaccineBuffer.save();
+        }
+        
+        orient.close();
+    }
+
+    //Incase of a random json string
+    public void setvaccine(String jsoString){
+        Gson gson = new Gson();
+        VaccineData newvaccine = gson.fromJson(jsoString, VaccineData.class);
+        setvaccine(newvaccine);
     }
 
 
