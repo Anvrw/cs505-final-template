@@ -34,6 +34,8 @@ public class Launcher {
 
         //READ CLASS COMMENTS BEFORE USING
         graphDBEngine = new GraphDBEngine("Connections");
+        embedded = new EmbeddedDbEngine();
+        System.out.println("Embedded Database Started...");
 
         cepEngine = new CEPEngine();
 
@@ -50,6 +52,7 @@ public class Launcher {
         String queryString = " " +
                 "from testInStream#window.timeBatch(5 sec) " +
                 "select zip_code, count() as count " +
+                "group by zip_code" +
                 "insert into testOutStream; ";
 
         cepEngine.createCEP(inputStreamName, outputStreamName, inputStreamAttributesString, outputStreamAttributesString, queryString);
@@ -59,11 +62,11 @@ public class Launcher {
 
         //start message collector
         Map<String,String> message_config = new HashMap<>();
-        message_config.put("hostname",""); //Fill config for your team in
-        message_config.put("port",""); //
-        message_config.put("username","");
+        message_config.put("hostname","url\":\"http://ajta238.cs.uky.edu"); //Fill config for your team in
+        message_config.put("port","9999"); //
+        message_config.put("username","912297061", "912267407");
         message_config.put("password","");
-        message_config.put("virtualhost","");
+        message_config.put("virtualhost","20");
 
         topicConnector = new TopicConnector(message_config);
         topicConnector.connect();
