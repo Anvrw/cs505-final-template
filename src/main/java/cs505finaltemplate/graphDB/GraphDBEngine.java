@@ -165,27 +165,12 @@ public class GraphDBEngine {
         orient.close();
     }
 
-    
-
-
     //Incase of a random json string
     public void setPatient(String jsoString){
         Gson gson = new Gson();
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
         setPatient(newPatient);
     }
-    public void createHospitalJson(String jsoString){
-        Gson gson = new Gson();
-        HospitalData newHospital = gson.fromJson(jsoString, HospitalData.class);
-        setHospital(newHospital);
-    }
-
-    public void createVaccineJson(String jsoString){
-        Gson gson = new Gson();
-        VaccineData newVaccine = gson.fromJson(jsoString, VaccineData.class);
-        setVaccine(newVaccine);
-    }
-
 
     //general case to add a hospital
     public void setHospital(HospitalData newhospital){
