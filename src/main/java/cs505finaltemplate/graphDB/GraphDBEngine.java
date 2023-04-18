@@ -235,7 +235,7 @@ public class GraphDBEngine {
         setHospital(newhospital);
     }
 
-
+    //changed setvaccine to setVaccine
     //general case to add a vaccine
     public void setVaccine(VaccineData newVaccine){
         
