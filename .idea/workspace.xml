@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Added Multiple Classes and constructors for Patient, Hospital, and Vaccine">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/graphDB/GraphDBEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/graphDB/GraphDBEngine.java" afterDir="false" />
-    </list>
+    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Changed setvaccine to setVaccine" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,7 +36,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1681782361363</updated>
-      <workItem from="1681782362744" duration="14671000" />
+      <workItem from="1681782362744" duration="14994000" />
     </task>
     <task id="LOCAL-00001" summary="Added Multiple Classes and constructors for Patient, Hospital, and Vaccine">
       <created>1681855619645</created>
@@ -55,7 +52,21 @@
       <option name="project" value="LOCAL" />
       <updated>1681855784062</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Changed setvaccine and all mentions to setVaccine">
+      <created>1681857059916</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1681857059916</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Changed setvaccine to setVaccine">
+      <created>1681857190808</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1681857190808</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -72,7 +83,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="master" />
+                        <option value="origin/master" />
                       </list>
                     </value>
                   </entry>
@@ -83,9 +94,26 @@
         </entry>
       </map>
     </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="origin/master" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added Multiple Classes and constructors for Patient, Hospital, and Vaccine" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Multiple Classes and constructors for Patient, Hospital, and Vaccine" />
+    <MESSAGE value="Changed setvaccine and all mentions to setVaccine" />
+    <MESSAGE value="Changed setvaccine to setVaccine" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed setvaccine to setVaccine" />
   </component>
 </project>
