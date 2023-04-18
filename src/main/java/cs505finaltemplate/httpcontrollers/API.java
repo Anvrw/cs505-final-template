@@ -14,6 +14,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 @Path("/api")
 public class API {
@@ -38,6 +40,7 @@ public class API {
             Map<String,String> responseMap = new HashMap<>();
             responseMap.put("team_name", "Persuasive Trees");
             responseMap.put("Team_members_sids", "[912297061,912267407]");
+            
             responseMap.put("app_status_code","0");
 
             responseString = gson.toJson(responseMap);
@@ -86,8 +89,8 @@ public class API {
     public Response zipalertlist() {
         String responseString = "{}";
         try{
-            Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("","");
+            Map<String,List<String>> responseMap = new HashMap<>();
+            responseMap.put("ziplist",Launcher.alertlist);
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
@@ -108,7 +111,7 @@ public class API {
         String responseString = "{}";
         try{
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("","");
+            responseMap.put("state_alert",String.valueOf(Launcher.alertlist.size() >= 5));
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){

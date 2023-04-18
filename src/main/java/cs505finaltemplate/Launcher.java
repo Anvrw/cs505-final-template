@@ -25,7 +25,7 @@ public class Launcher {
     public static final int WEB_PORT = 8082;
 
     public static String lastCEPOutput = "{}";
-    public static List<Integer> alertlist = new ArrayList<Integer>();
+    public static List<String> alertlist = new ArrayList<String>();
 
     public static void main(String[] args) throws IOException {
 
@@ -33,7 +33,7 @@ public class Launcher {
         //startig DB/CEP init
 
         //READ CLASS COMMENTS BEFORE USING
-        //graphDBEngine = new GraphDBEngine();
+        graphDBEngine = new GraphDBEngine("Connections");
 
         cepEngine = new CEPEngine();
 

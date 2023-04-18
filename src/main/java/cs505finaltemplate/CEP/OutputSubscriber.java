@@ -1,7 +1,10 @@
 package cs505finaltemplate.CEP;
 
+import com.jayway.jsonpath.internal.function.text.Length;
+
 import cs505finaltemplate.Launcher;
 import io.siddhi.core.util.transport.InMemoryBroker;
+
 
 public class OutputSubscriber implements InMemoryBroker.Subscriber {
 
@@ -20,13 +23,31 @@ public class OutputSubscriber implements InMemoryBroker.Subscriber {
 
             //You will need to parse output and do other logic,
             //but this sticks the last output value in main
+            String[] oldTokens = Launcher.lastCEPOutput.replaceAll("[^0-9,]", "").split(",");
+            String[] msgTokens = String.valueOf(msg).replaceAll("[^0-9,]", "").split(",");
+
+            
+            for(int i=0; i<msgTokens.length;i+=2){
+                for(int j=0; j<oldTokens.length;j+=2){
+                    if(msgTokens[i].equals(oldTokens[j])){
+                        int countNew = Integer.parseInt(msgTokens[j+1]);
+                        int countOld = Integer.parseInt(oldTokens[j+1]);
+
+                        if(countNew < 2*countOld){
+                            Launcher.alertlist.remove(oldTokens[i]);  
+                        }
+                        else {
+                            if(Launcher.alertlist.indexOf(msgTokens[i])!=-1)
+                                Launcher.alertlist.add(oldTokens[i]);
+                        }
+                        break;
+                    }
+                }
+            }
+
             Launcher.lastCEPOutput = String.valueOf(msg);
-
-            //String[] sstr = String.valueOf(msg).split(":");
-            //String[] outval = sstr[2].split("}");
-            //Launcher.accessCount = Long.parseLong(outval[0]);
-
-        } catch(Exception ex) {
+        } 
+        catch(Exception ex) {
             ex.printStackTrace();
         }
 

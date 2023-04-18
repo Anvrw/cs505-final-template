@@ -77,7 +77,7 @@ public class CEPEngine {
             //Starting event processing
             siddhiAppRuntime.start();
 
-            } catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
