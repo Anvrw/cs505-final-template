@@ -83,23 +83,12 @@ public class TopicConnector {
                     Map<String,String> zip_entry = new HashMap<>();
                     zip_entry.put("zip_code",String.valueOf(testingData.patient_zipcode));
                     String testInput = gson.toJson(zip_entry);
-                    //uncomment for debug
-                    //System.out.println("testInput: " + testInput);
+                    
 
                     //insert into CEP
                     Launcher.cepEngine.input("testInStream",testInput);
 
-                    //do something else with each record
-                    /*
-                    System.out.println("*Java Class*");
-                    System.out.println("\ttesting_id = " + testingData.testing_id);
-                    System.out.println("\tpatient_name = " + testingData.patient_name);
-                    System.out.println("\tpatient_mrn = " + testingData.patient_mrn);
-                    System.out.println("\tpatient_zipcode = " + testingData.patient_zipcode);
-                    System.out.println("\tpatient_status = " + testingData.patient_status);
-                    System.out.println("\tcontact_list = " + testingData.contact_list);
-                    System.out.println("\tevent_list = " + testingData.event_list);
-                     */
+
                 }
 
             };

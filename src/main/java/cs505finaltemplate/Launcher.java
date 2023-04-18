@@ -34,7 +34,7 @@ public class Launcher {
 
         //READ CLASS COMMENTS BEFORE USING
         graphDBEngine = new GraphDBEngine("Connections");
-        embedded = new EmbeddedDbEngine();
+        
         System.out.println("Embedded Database Started...");
 
         cepEngine = new CEPEngine();

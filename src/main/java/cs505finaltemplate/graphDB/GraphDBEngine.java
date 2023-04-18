@@ -7,6 +7,7 @@ import cs505finaltemplate.Topics.VaccineData;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
 import com.orientechnologies.orient.core.db.ODatabaseType;
@@ -128,11 +129,8 @@ public class GraphDBEngine {
     }
 
     //general case to add a patient
-    public void setPatient(PatientData newPatient){
-
-        ODatabaseSession database;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+    public void createPatient(PatientData newPatient, ODatabaseSession database){
+        
         String query = "SELECT FROM patient WHERE patient_mrn = ?";
         OResultSet result = database.query(query, newPatient.patient_mrn);
 
@@ -158,43 +156,26 @@ public class GraphDBEngine {
             PatientBuffer.setProperty("patient_status", newPatient.patient_status);
             PatientBuffer.setProperty("contact_list", newPatient.contact_list);
             PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status", 0);
+            PatientBuffer.setProperty("patient_status",0);
             PatientBuffer.save();
         }
-
-
-        orient.close();
-
+        
     }
-
-    public void setHospital(HospitalData newHospital){
-
 
     //Incase of a random json string
-    public void setPatient(String jsoString){
+    public void createPatient(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
-        setPatient(newPatient);
-    }
-    public void createHospitalJson(String jsoString){
-        Gson gson = new Gson();
-        HospitalData = newHospital = gson.fromJson(jsoString, HospitalData.class);
-        setHospital(newHospital);
+        createPatient(newPatient,database);
     }
 
-    public void createVaccineJson(String jsoString){
-        Gson gson = new Gson();
-        VaccineData = newVaccine = gson.fromJson(jsoString, VaccineData.class);
-        setVaccine(newVaccine);
-    }
+    public void addHosPatEdges(HospitalData hospitalData){
 
+    }
 
     //general case to add a hospital
-    public void setHospital(HospitalData newhospital){
-
-        ODatabaseSession database;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+    public void createHospital(HospitalData newhospital, ODatabaseSession database){
+        
         String query = "SELECT FROM hospital WHERE hospital_mrn = ?";
         OResultSet result = database.query(query, newhospital.id);
 
@@ -220,7 +201,7 @@ public class GraphDBEngine {
             hospitalBuffer.save();
         }
 
-        else if (result.next().isVertex()){
+        else if (result.next().isVertex()) {
             OVertex hospitalBuffer = result.next().getVertex().get();
             hospitalBuffer.setProperty("hospital_id", newhospital.id);
             hospitalBuffer.setProperty("hospital_name", newhospital.name);
@@ -241,24 +222,19 @@ public class GraphDBEngine {
             hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
             hospitalBuffer.save();
         }
-
-        orient.close();
+        
     }
 
     //Incase of a random json string
-    public void setHospital(String jsoString){
+    public void createHospital(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         HospitalData newhospital = gson.fromJson(jsoString, HospitalData.class);
-        setHospital(newhospital);
+        createHospital(newhospital,database);
     }
 
-
     //general case to add a vaccine
-    public void setvaccine(VaccineData newvaccine){
-
-        ODatabaseSession database;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+    public void createVaccine(VaccineData newvaccine, ODatabaseSession database){
+        
         String query = "SELECT FROM vaccine WHERE vaccine_mrn = ?";
         OResultSet result = database.query(query, newvaccine.patient_mrn);
 
@@ -270,22 +246,26 @@ public class GraphDBEngine {
             vaccineBuffer.save();
         }
 
-        else if (result.next().isVertex()){
+        else if (result.next().isVertex()) {
             OVertex vaccineBuffer = result.next().getVertex().get();
             vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
             vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
             vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
             vaccineBuffer.save();
+
         }
 
-        orient.close();
     }
 
     //Incase of a random json string
-    public void setvaccine(String jsoString){
+    public void createVaccine(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         VaccineData newvaccine = gson.fromJson(jsoString, VaccineData.class);
-        setvaccine(newvaccine);
+        createVaccine(newvaccine,database);
+    }
+
+    public void createEvent(List<PatientData> Patients, OVertex Patient, ODatabaseSession database){
+
     }
 
 
@@ -303,6 +283,8 @@ public class GraphDBEngine {
 
         rs.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
     }
+
+    
 
     private void clearDB(ODatabaseSession db) {
 
