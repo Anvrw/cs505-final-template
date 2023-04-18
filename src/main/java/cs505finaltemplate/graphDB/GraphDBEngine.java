@@ -128,15 +128,15 @@ public class GraphDBEngine {
     }
 
     //general case to add a patient
-    public void setPatient(PatientData newPatient){
-        
+    public void setPatient(PatientData newPatient) {
+
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
         String query = "SELECT FROM patient WHERE patient_mrn = ?";
         OResultSet result = database.query(query, newPatient.patient_mrn);
 
-        if(!result.hasNext()){
+        if (!result.hasNext()) {
             OVertex PatientBuffer = database.newVertex("patient");
             PatientBuffer.setProperty("testing_id", newPatient.testing_id);
             PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
@@ -145,11 +145,9 @@ public class GraphDBEngine {
             PatientBuffer.setProperty("patient_status", newPatient.patient_status);
             PatientBuffer.setProperty("contact_list", newPatient.contact_list);
             PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",0);
+            PatientBuffer.setProperty("patient_status", 0);
             PatientBuffer.save();
-        }
-
-        else if (result.next().isVertex()){
+        } else if (result.next().isVertex()) {
             OVertex PatientBuffer = result.next().getVertex().get();
             PatientBuffer.setProperty("testing_id", newPatient.testing_id);
             PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
@@ -158,88 +156,10 @@ public class GraphDBEngine {
             PatientBuffer.setProperty("patient_status", newPatient.patient_status);
             PatientBuffer.setProperty("contact_list", newPatient.contact_list);
             PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",0);
+            PatientBuffer.setProperty("patient_status", 0);
             PatientBuffer.save();
-        }
-
-            else if (result.next().isVertex()){
-                OVertex VaccineBuffer = result.next().getVertex().get();
-                PatientBuffer.setProperty("testing_id", newPatient.testing_id);
-                PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
-                PatientBuffer.setProperty("patient_name", newPatient.patient_name);
-                PatientBuffer.setProperty("patient_status", newPatient.patient_status);
-                PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
-                PatientBuffer.setProperty("patient_status", newPatient.patient_status);
-                PatientBuffer.setProperty("contact_list", newPatient.contact_list);
-                PatientBuffer.setProperty("event_list", newPatient.event_list);
-                PatientBuffer.setProperty("patient_status",0);
-                PatientBuffer.save();
-            }
-
-        
-        orient.close();
-    }
-
-    public void setHospital(HospitalData newHospital){
-
-        ODatabaseSession database;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
-        String query = "SELECT FROM hospital WHERE name = ?";
-        OResultSet result = database.query(query, newHospital.patient_mrn);
-
-        if (!result.hasNext()) {
-            OVertex HospitalBuffer = database.newVertex("hospital");
-            HospitalBuffer.setProperty("_id", newHospital.);
-            HospitalBuffer.setProperty("ID", newHospital.);
-            HospitalBuffer.setProperty("NAME", newHospital.);
-            HospitalBuffer.setProperty("ADDRESS", newHospital.);
-            HospitalBuffer.setProperty("CITY", newHospital.);
-            HospitalBuffer.setProperty("STATE", newHospital.);
-            HospitalBuffer.setProperty("ZIP", newHospital.);
-            HospitalBuffer.setProperty("TYPE", newHospital.);
-            HospitalBuffer.setProperty("BEDS", newHospital.);
-            HospitalBuffer.setProperty("COUNTY", newHospital.);
-            HospitalBuffer.setProperty("COUNTYFLIPS", newHospital.);
-            HospitalBuffer.setProperty("COUNTRY", newHospital.);
-            HospitalBuffer.setProperty("LATITUDE", newHospital.);
-            HospitalBuffer.setProperty("LONGITUDE", newHospital.);
-            HospitalBuffer.setProperty("NAICS_CODE", newHospital.);
-            HospitalBuffer.setProperty("WEBSITE", newHospitalt.);
-            HospitalBuffer.setProperty("OWNER", newHospital.);
-            HospitalBuffer.setProperty("TRAUMA", newHospital.);
-            HospitalBuffer.setProperty("HELIPAD", newHospital.);
-            HospitalBufferBuffer.setProperty("hospital_status", 0);
-            HospitalBuffer.save();
-        }
-
-            else if (!result.hasNext()) {
-                OVertex HospitalBuffer = result.next().getVertex().get();
-                HospitalBuffer.setProperty("_id", newHospital.);
-                HospitalBuffer.setProperty("ID", newHospital.);
-                HospitalBuffer.setProperty("NAME", newHospital.);
-                HospitalBuffer.setProperty("ADDRESS", newHospital.);
-                HospitalBuffer.setProperty("CITY", newHospital.);
-                HospitalBuffer.setProperty("STATE", newHospital.);
-                HospitalBuffer.setProperty("ZIP", newHospital.);
-                HospitalBuffer.setProperty("TYPE", newHospital.);
-                HospitalBuffer.setProperty("BEDS", newHospital.);
-                HospitalBuffer.setProperty("COUNTY", newHospital.);
-                HospitalBuffer.setProperty("COUNTYFLIPS", newHospital.);
-                HospitalBuffer.setProperty("COUNTRY", newHospital.);
-                HospitalBuffer.setProperty("LATITUDE", newHospital.);
-                HospitalBuffer.setProperty("LONGITUDE", newHospital.);
-                HospitalBuffer.setProperty("NAICS_CODE", newHospital.);
-                HospitalBuffer.setProperty("WEBSITE", newHospital.);
-                HospitalBuffer.setProperty("OWNER", newHospital.);
-                HospitalBuffer.setProperty("TRAUMA", newHospital.);
-                HospitalBuffer.setProperty("HELIPAD", newHospital.);
-                HospitalBufferBuffer.setProperty("hospital_status", 0);
-                HospitalBuffer.save();
-            }
 
         orient.close();
-
     }
 
     public void setHospital(HospitalData newHospital){
@@ -251,18 +171,6 @@ public class GraphDBEngine {
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
         setPatient(newPatient);
     }
-    public void createHospitalJson(String jsoString){
-        Gson gson = new Gson();
-        HospitalData = newHospital = gson.fromJson(jsoString, HospitalData.class);
-        setHospital(newHospital);
-    }
-
-    public void createVaccineJson(String jsoString){
-        Gson gson = new Gson();
-        VaccineData = newVaccine = gson.fromJson(jsoString, VaccineData.class);
-        setVaccine(newVaccine);
-    }
-
 
     //general case to add a hospital
     public void setHospital(HospitalData newhospital){
@@ -329,38 +237,38 @@ public class GraphDBEngine {
 
 
     //general case to add a vaccine
-    public void setvaccine(VaccineData newvaccine){
+    public void setVaccine(VaccineData newVaccine){
         
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
         String query = "SELECT FROM vaccine WHERE vaccine_mrn = ?";
-        OResultSet result = database.query(query, newvaccine.patient_mrn);
+        OResultSet result = database.query(query, newVaccine.patient_mrn);
 
         if(!result.hasNext()){
-            OVertex vaccineBuffer = database.newVertex("vaccine");
-            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
-            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
-            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
-            vaccineBuffer.save();
+            OVertex VaccineBuffer = database.newVertex("vaccine");
+            VaccineBuffer.setProperty("testing_id", newVaccine.vaccination_id);
+            VaccineBuffer.setProperty("patient_mrn", newVaccine.patient_mrn);
+            VaccineBuffer.setProperty("patient_name", newVaccine.patient_name);
+            VaccineBuffer.save();
         }
 
         else if (result.next().isVertex()){
-            OVertex vaccineBuffer = result.next().getVertex().get();
-            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
-            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
-            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
-            vaccineBuffer.save();
+            OVertex VaccineBuffer = result.next().getVertex().get();
+            VaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
+            VaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
+            VaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
+            VaccineBuffer.save();
         }
         
         orient.close();
     }
 
     //Incase of a random json string
-    public void setvaccine(String jsoString){
+    public void setVaccine(String jsoString){
         Gson gson = new Gson();
-        VaccineData newvaccine = gson.fromJson(jsoString, VaccineData.class);
-        setvaccine(newvaccine);
+        VaccineData newVaccine = gson.fromJson(jsoString, VaccineData.class);
+        setVaccine(newVaccine);
     }
 
 
