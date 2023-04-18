@@ -129,7 +129,7 @@ public class GraphDBEngine {
 
     //general case to add a patient
     public void setPatient(PatientData newPatient){
-        
+
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
@@ -149,7 +149,7 @@ public class GraphDBEngine {
             PatientBuffer.save();
         }
 
-        else if (result.next().isVertex()){
+        else if (result.next().isVertex()) {
             OVertex PatientBuffer = result.next().getVertex().get();
             PatientBuffer.setProperty("testing_id", newPatient.testing_id);
             PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
@@ -158,12 +158,17 @@ public class GraphDBEngine {
             PatientBuffer.setProperty("patient_status", newPatient.patient_status);
             PatientBuffer.setProperty("contact_list", newPatient.contact_list);
             PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",0);
+            PatientBuffer.setProperty("patient_status", 0);
             PatientBuffer.save();
         }
-        
+
+
         orient.close();
+
     }
+
+    public void setHospital(HospitalData newHospital){
+
 
     //Incase of a random json string
     public void setPatient(String jsoString){
@@ -171,10 +176,22 @@ public class GraphDBEngine {
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
         setPatient(newPatient);
     }
+    public void createHospitalJson(String jsoString){
+        Gson gson = new Gson();
+        HospitalData = newHospital = gson.fromJson(jsoString, HospitalData.class);
+        setHospital(newHospital);
+    }
+
+    public void createVaccineJson(String jsoString){
+        Gson gson = new Gson();
+        VaccineData = newVaccine = gson.fromJson(jsoString, VaccineData.class);
+        setVaccine(newVaccine);
+    }
+
 
     //general case to add a hospital
     public void setHospital(HospitalData newhospital){
-        
+
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
@@ -224,7 +241,7 @@ public class GraphDBEngine {
             hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
             hospitalBuffer.save();
         }
-        
+
         orient.close();
     }
 
@@ -238,7 +255,7 @@ public class GraphDBEngine {
 
     //general case to add a vaccine
     public void setvaccine(VaccineData newvaccine){
-        
+
         ODatabaseSession database;
         OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
@@ -260,7 +277,7 @@ public class GraphDBEngine {
             vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
             vaccineBuffer.save();
         }
-        
+
         orient.close();
     }
 
