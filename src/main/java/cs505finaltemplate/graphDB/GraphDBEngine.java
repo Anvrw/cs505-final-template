@@ -285,7 +285,7 @@ public class GraphDBEngine {
     }
 
     //general case to add a hospital
-    public void createHospital(HospitalData newhospital, ODatabaseSession database){
+    public void createHospPat(HospPatData newhospital, ODatabaseSession database){
         
         String query = "SELECT FROM hospital WHERE hospital_id = ?";
         OResultSet result = database.query(query, newhospital.id);
@@ -296,34 +296,19 @@ public class GraphDBEngine {
 
         else 
             hospitalBuffer = result.next().getVertex().get();
-            
+
         hospitalBuffer.setProperty("hospital_id", newhospital.id);
-        hospitalBuffer.setProperty("hospital_name", newhospital.name);
-        hospitalBuffer.setProperty("hospital_address", newhospital.address);
-        hospitalBuffer.setProperty("hospital_city", newhospital.city);
-        hospitalBuffer.setProperty("hospital_state", newhospital.state);
-        hospitalBuffer.setProperty("hospital_type", newhospital.type);
-        hospitalBuffer.setProperty("hospital_beds", newhospital.beds);
-        hospitalBuffer.setProperty("hospital_county", newhospital.county);
-        hospitalBuffer.setProperty("hospital_countyfips", newhospital.countyfips);
-        hospitalBuffer.setProperty("hospital_country", newhospital.country);
-        hospitalBuffer.setProperty("hospital_latitude", newhospital.latitude);
-        hospitalBuffer.setProperty("hospital_longitude", newhospital.longitude);
-        hospitalBuffer.setProperty("hospital_type", newhospital.type);
-        hospitalBuffer.setProperty("hospital_website", newhospital.website);
-        hospitalBuffer.setProperty("hospital_owner", newhospital.owner);
-        hospitalBuffer.setProperty("hospital_trauma", newhospital.trauma);
-        hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
+
         hospitalBuffer.save();
-        
-        
+
+        addHospPatEdges(null, database);
     }
 
     //Incase of a random json string
-    public void createHospital(String jsoString, ODatabaseSession database){
+    public void createHospPat(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
-        HospitalData newhospital = gson.fromJson(jsoString, HospitalData.class);
-        createHospital(newhospital,database);
+        HospPatData newhospital = gson.fromJson(jsoString, HospPatData.class);
+        createHospPat(newhospital,database);
     }
 
 
@@ -394,6 +379,34 @@ public class GraphDBEngine {
         createVaccine(newvaccine,database);
     }
 
+    public void jsoInputHandler(String message, Character type){
+
+        OrientDB orient;
+        ODatabaseSession database;
+        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, "root", "rootpwd");
+
+
+        switch(type){
+            case 'h':
+                createHospPat(message,database);
+            break;
+
+            case 'p':
+                createPatient(message, database);
+            break;
+
+            case 'v':
+                createVaccine(message, database);
+            break;
+
+            default:
+            break;
+        }
+
+        database.close();
+        orient.close();
+    }
 
     private void getContacts(ODatabaseSession db, String patient_mrn) {
 
