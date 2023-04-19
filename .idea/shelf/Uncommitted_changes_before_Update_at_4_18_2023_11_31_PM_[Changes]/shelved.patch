@@ -1,0 +1,69 @@
+Index: src/main/java/cs505finaltemplate/Launcher.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/cs505finaltemplate/Launcher.java b/src/main/java/cs505finaltemplate/Launcher.java
+--- a/src/main/java/cs505finaltemplate/Launcher.java	
++++ b/src/main/java/cs505finaltemplate/Launcher.java	
+@@ -64,7 +64,7 @@
+         Map<String,String> message_config = new HashMap<>();
+         message_config.put("hostname","url\":\"http://ajta238.cs.uky.edu"); //Fill config for your team in
+         message_config.put("port","9999"); //
+-        message_config.put("username","912297061", "912267407");
++        message_config.put("username","912297061, 912267407");
+         message_config.put("password","");
+         message_config.put("virtualhost","20");
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	
++++ b/.idea/workspace.xml	
+@@ -1,7 +1,10 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Changed setvaccine to setVaccine" />
++    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Changed setvaccine to setVaccine">
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/Launcher.java" afterDir="false" />
++    </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+@@ -36,7 +39,7 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1681782361363</updated>
+-      <workItem from="1681782362744" duration="14994000" />
++      <workItem from="1681782362744" duration="21733000" />
+     </task>
+     <task id="LOCAL-00001" summary="Added Multiple Classes and constructors for Patient, Hospital, and Vaccine">
+       <created>1681855619645</created>
+@@ -66,7 +69,21 @@
+       <option name="project" value="LOCAL" />
+       <updated>1681857190808</updated>
+     </task>
+-    <option name="localTasksCounter" value="5" />
++    <task id="LOCAL-00005" summary="Changed setvaccine to setVaccine">
++      <created>1681857327790</created>
++      <option name="number" value="00005" />
++      <option name="presentableId" value="LOCAL-00005" />
++      <option name="project" value="LOCAL" />
++      <updated>1681857327790</updated>
++    </task>
++    <task id="LOCAL-00006" summary="Changed setvaccine to setVaccine">
++      <created>1681857532983</created>
++      <option name="number" value="00006" />
++      <option name="presentableId" value="LOCAL-00006" />
++      <option name="project" value="LOCAL" />
++      <updated>1681857532983</updated>
++    </task>
++    <option name="localTasksCounter" value="7" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
