@@ -290,7 +290,7 @@ public class GraphDBEngine {
     public void setHospPat(HospPatData newhospital, ODatabaseSession database){
         
         String query = "SELECT FROM hospital WHERE hospital_id = ?";
-        OResultSet result = database.query(query, newhospital.id);
+        OResultSet result = database.query(query, newhospital.hospital_id);
         OVertex hospitalBuffer;
 
         if(!result.hasNext())
@@ -299,7 +299,7 @@ public class GraphDBEngine {
         else 
             hospitalBuffer = result.next().getVertex().get();
 
-        hospitalBuffer.setProperty("hospital_id", newhospital.id);
+        hospitalBuffer.setProperty("hospital_id", newhospital.hospital_id);
 
         hospitalBuffer.save();
 
