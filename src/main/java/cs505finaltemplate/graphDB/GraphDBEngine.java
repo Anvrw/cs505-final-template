@@ -147,7 +147,7 @@ public class GraphDBEngine {
     }
 
 
-    public void createContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
+    public void setContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
         
         String queryContactMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
         String queryContactPatEdges = "SELECT FROM contact_with WHERE to = ? AND from = ?";
@@ -177,7 +177,7 @@ public class GraphDBEngine {
         }
     }
 
-    public void createEventEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
+    public void setEventEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
 
         String queryEventIDs = "SELECT FROM event WHERE event_id = ?";
         String queryEventPatEdges = "SELECT FROM participant WHERE to = ? AND from = ?";
@@ -209,7 +209,7 @@ public class GraphDBEngine {
     }
 
     //general case to add a patient
-    public void createPatient(PatientData newPatient, ODatabaseSession database){
+    public void setPatient(PatientData newPatient, ODatabaseSession database){
         
         String query = "SELECT FROM patient WHERE patient_mrn = ?";
         OResultSet result = database.query(query, newPatient.patient_mrn);
@@ -232,8 +232,8 @@ public class GraphDBEngine {
         PatientBuffer.setProperty("patient_status",0);
         PatientBuffer.save();
         
-        createEventEdge(newPatient, PatientBuffer, database);
-        createContactEdge(newPatient, PatientBuffer, database);
+        setEventEdge(newPatient, PatientBuffer, database);
+        setContactEdge(newPatient, PatientBuffer, database);
         
     }
 
@@ -241,7 +241,7 @@ public class GraphDBEngine {
     public void createPatient(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         PatientData newPatient = gson.fromJson(jsoString, PatientData.class);
-        createPatient(newPatient,database);
+        setPatient(newPatient,database);
     }
 
     //Handles HospPatData inputs
@@ -285,7 +285,7 @@ public class GraphDBEngine {
     }
 
     //general case to add a hospital
-    public void createHospPat(HospPatData newhospital, ODatabaseSession database){
+    public void setHospPat(HospPatData newhospital, ODatabaseSession database){
         
         String query = "SELECT FROM hospital WHERE hospital_id = ?";
         OResultSet result = database.query(query, newhospital.id);
@@ -308,11 +308,11 @@ public class GraphDBEngine {
     public void createHospPat(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         HospPatData newhospital = gson.fromJson(jsoString, HospPatData.class);
-        createHospPat(newhospital,database);
+        setHospPat(newhospital,database);
     }
 
 
-    public void createVaccPatEdge(VaccineData vaccineData,ODatabaseSession database){
+    public void setVaccPatEdge(VaccineData vaccineData,ODatabaseSession database){
         String queryVaccineIDs = "SELECT FROM hospital WHERE hospital_id = ?";
         String queryPatientMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
         String queryVaccPatEdges = "SELECT FROM patient_at WHERE to = ? AND from = ?";
@@ -351,7 +351,7 @@ public class GraphDBEngine {
     }
 
     //general case to add a vaccine
-    public void createVaccine(VaccineData newvaccine, ODatabaseSession database){
+    public void setVaccine(VaccineData newvaccine, ODatabaseSession database){
         
         String query = "SELECT FROM vaccine WHERE vaccine_id = ?";
         OResultSet result = database.query(query, newvaccine.patient_mrn);
@@ -368,7 +368,7 @@ public class GraphDBEngine {
         vaccineBuffer.save();
         
 
-        createVaccPatEdge(newvaccine, database);
+        setVaccPatEdge(newvaccine, database);
 
     }
 
@@ -376,7 +376,7 @@ public class GraphDBEngine {
     public void createVaccine(String jsoString, ODatabaseSession database){
         Gson gson = new Gson();
         VaccineData newvaccine = gson.fromJson(jsoString, VaccineData.class);
-        createVaccine(newvaccine,database);
+        setVaccine(newvaccine,database);
     }
 
     public void jsoInputHandler(String message, Character type){
