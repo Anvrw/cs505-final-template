@@ -137,6 +137,15 @@ public class GraphDBEngine {
         }
     }
 
+    private void clearDB(ODatabaseSession db) {
+
+        db.command("DELETE VERTEX FROM patient");
+        db.command("DELETE VERTEX FROM hospital");
+        db.command("DELETE VERTEX FROM event");
+        db.command("DELETE VERTEX FROM vacc");
+
+    }
+
 
     public void createContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
         
@@ -205,31 +214,26 @@ public class GraphDBEngine {
         String query = "SELECT FROM patient WHERE patient_mrn = ?";
         OResultSet result = database.query(query, newPatient.patient_mrn);
 
-        if(!result.hasNext()){
-            OVertex PatientBuffer = database.newVertex("patient");
-            PatientBuffer.setProperty("testing_id", newPatient.testing_id);
-            PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
-            PatientBuffer.setProperty("patient_name", newPatient.patient_name);
-            PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
-            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
-            PatientBuffer.setProperty("contact_list", newPatient.contact_list);
-            PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",newPatient.patient_status);
-            PatientBuffer.save();
-        }
+        OVertex PatientBuffer;
 
-        else if (result.next().isVertex()) {
-            OVertex PatientBuffer = result.next().getVertex().get();
-            PatientBuffer.setProperty("testing_id", newPatient.testing_id);
-            PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
-            PatientBuffer.setProperty("patient_name", newPatient.patient_name);
-            PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
-            PatientBuffer.setProperty("patient_status", newPatient.patient_status);
-            PatientBuffer.setProperty("contact_list", newPatient.contact_list);
-            PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",0);
-            PatientBuffer.save();
-        }
+        if(!result.hasNext())
+            PatientBuffer = database.newVertex("patient");
+           
+        else 
+            PatientBuffer = result.next().getVertex().get();
+
+        PatientBuffer.setProperty("testing_id", newPatient.testing_id);
+        PatientBuffer.setProperty("patient_mrn", newPatient.patient_mrn);
+        PatientBuffer.setProperty("patient_name", newPatient.patient_name);
+        PatientBuffer.setProperty("patient_zipcode", newPatient.patient_zipcode);
+        PatientBuffer.setProperty("patient_status", newPatient.patient_status);
+        PatientBuffer.setProperty("contact_list", newPatient.contact_list);
+        PatientBuffer.setProperty("event_list", newPatient.event_list);
+        PatientBuffer.setProperty("patient_status",0);
+        PatientBuffer.save();
+        
+        createEventEdge(newPatient, PatientBuffer, database);
+        createContactEdge(newPatient, PatientBuffer, database);
         
     }
 
@@ -285,50 +289,33 @@ public class GraphDBEngine {
         
         String query = "SELECT FROM hospital WHERE hospital_id = ?";
         OResultSet result = database.query(query, newhospital.id);
+        OVertex hospitalBuffer;
 
-        if(!result.hasNext()){
-            OVertex hospitalBuffer = database.newVertex("hospital");
-            hospitalBuffer.setProperty("hospital_id", newhospital.id);
-            hospitalBuffer.setProperty("hospital_name", newhospital.name);
-            hospitalBuffer.setProperty("hospital_address", newhospital.address);
-            hospitalBuffer.setProperty("hospital_city", newhospital.city);
-            hospitalBuffer.setProperty("hospital_state", newhospital.state);
-            hospitalBuffer.setProperty("hospital_type", newhospital.type);
-            hospitalBuffer.setProperty("hospital_beds", newhospital.beds);
-            hospitalBuffer.setProperty("hospital_county", newhospital.county);
-            hospitalBuffer.setProperty("hospital_countyfips", newhospital.countyfips);
-            hospitalBuffer.setProperty("hospital_country", newhospital.country);
-            hospitalBuffer.setProperty("hospital_latitude", newhospital.latitude);
-            hospitalBuffer.setProperty("hospital_longitude", newhospital.longitude);
-            hospitalBuffer.setProperty("hospital_type", newhospital.type);
-            hospitalBuffer.setProperty("hospital_website", newhospital.website);
-            hospitalBuffer.setProperty("hospital_owner", newhospital.owner);
-            hospitalBuffer.setProperty("hospital_trauma", newhospital.trauma);
-            hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
-            hospitalBuffer.save();
-        }
+        if(!result.hasNext())
+            hospitalBuffer = database.newVertex("hospital");
 
-        else if (result.next().isVertex()) {
-            OVertex hospitalBuffer = result.next().getVertex().get();
-            hospitalBuffer.setProperty("hospital_id", newhospital.id);
-            hospitalBuffer.setProperty("hospital_name", newhospital.name);
-            hospitalBuffer.setProperty("hospital_address", newhospital.address);
-            hospitalBuffer.setProperty("hospital_city", newhospital.city);
-            hospitalBuffer.setProperty("hospital_state", newhospital.state);
-            hospitalBuffer.setProperty("hospital_type", newhospital.type);
-            hospitalBuffer.setProperty("hospital_beds", newhospital.beds);
-            hospitalBuffer.setProperty("hospital_county", newhospital.county);
-            hospitalBuffer.setProperty("hospital_countyfips", newhospital.countyfips);
-            hospitalBuffer.setProperty("hospital_country", newhospital.country);
-            hospitalBuffer.setProperty("hospital_latitude", newhospital.latitude);
-            hospitalBuffer.setProperty("hospital_longitude", newhospital.longitude);
-            hospitalBuffer.setProperty("hospital_type", newhospital.type);
-            hospitalBuffer.setProperty("hospital_website", newhospital.website);
-            hospitalBuffer.setProperty("hospital_owner", newhospital.owner);
-            hospitalBuffer.setProperty("hospital_trauma", newhospital.trauma);
-            hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
-            hospitalBuffer.save();
-        }
+        else 
+            hospitalBuffer = result.next().getVertex().get();
+            
+        hospitalBuffer.setProperty("hospital_id", newhospital.id);
+        hospitalBuffer.setProperty("hospital_name", newhospital.name);
+        hospitalBuffer.setProperty("hospital_address", newhospital.address);
+        hospitalBuffer.setProperty("hospital_city", newhospital.city);
+        hospitalBuffer.setProperty("hospital_state", newhospital.state);
+        hospitalBuffer.setProperty("hospital_type", newhospital.type);
+        hospitalBuffer.setProperty("hospital_beds", newhospital.beds);
+        hospitalBuffer.setProperty("hospital_county", newhospital.county);
+        hospitalBuffer.setProperty("hospital_countyfips", newhospital.countyfips);
+        hospitalBuffer.setProperty("hospital_country", newhospital.country);
+        hospitalBuffer.setProperty("hospital_latitude", newhospital.latitude);
+        hospitalBuffer.setProperty("hospital_longitude", newhospital.longitude);
+        hospitalBuffer.setProperty("hospital_type", newhospital.type);
+        hospitalBuffer.setProperty("hospital_website", newhospital.website);
+        hospitalBuffer.setProperty("hospital_owner", newhospital.owner);
+        hospitalBuffer.setProperty("hospital_trauma", newhospital.trauma);
+        hospitalBuffer.setProperty("hospital_heli", newhospital.helipad);
+        hospitalBuffer.save();
+        
         
     }
 
@@ -383,22 +370,18 @@ public class GraphDBEngine {
         
         String query = "SELECT FROM vaccine WHERE vaccine_id = ?";
         OResultSet result = database.query(query, newvaccine.patient_mrn);
+        OVertex vaccineBuffer;
 
-        if(!result.hasNext()){
-            OVertex vaccineBuffer = database.newVertex("vaccine");
-            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
-            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
-            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
-            vaccineBuffer.save();
-        }
+        if(!result.hasNext())
+            vaccineBuffer = database.newVertex("vaccine");
+        else 
+            vaccineBuffer = result.next().getVertex().get();
 
-        else if (result.next().isVertex()) {
-            OVertex vaccineBuffer = result.next().getVertex().get();
-            vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
-            vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
-            vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
-            vaccineBuffer.save();
-        }
+        vaccineBuffer.setProperty("testing_id", newvaccine.vaccination_id);
+        vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
+        vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
+        vaccineBuffer.save();
+        
 
         createVaccPatEdge(newvaccine, database);
 
@@ -429,13 +412,5 @@ public class GraphDBEngine {
 
     
 
-    private void clearDB(ODatabaseSession db) {
-
-        db.command("DELETE VERTEX FROM patient");
-        db.command("DELETE VERTEX FROM hospital");
-        db.command("DELETE VERTEX FROM event");
-        db.command("DELETE VERTEX FROM vacc");
-
-    }
-
+    
 }
