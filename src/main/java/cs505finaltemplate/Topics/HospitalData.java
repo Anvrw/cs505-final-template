@@ -1,5 +1,7 @@
 package cs505finaltemplate.Topics;
 
+import java.util.List;
+
 public class HospitalData {
     public int id;
     public String name;
@@ -19,6 +21,7 @@ public class HospitalData {
     public String owner;
     public String trauma;
     public String helipad;
+    public List<String> Patients;
 
     public HospitalData(int id,String name,String address,String city,String state,
      int zipcode,String type,int beds,String county,int countyfips,String country,

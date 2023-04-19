@@ -4,6 +4,7 @@ package cs505finaltemplate.graphDB;
 import cs505finaltemplate.Topics.PatientData;
 import cs505finaltemplate.Topics.HospitalData;
 import cs505finaltemplate.Topics.VaccineData;
+import cs505finaltemplate.Topics.HospPatData;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -58,6 +59,14 @@ public class GraphDBEngine {
 
         if (patient.getProperty("patient_mrn") == null) {
             patient.createProperty("patient_mrn", OType.STRING);
+            patient.createProperty("testing_id", OType.INTEGER);
+            patient.createProperty("patient_mrn", OType.STRING);
+            patient.createProperty("patient_name", OType.STRING);
+            patient.createProperty("patient_zipcode", OType.INTEGER);
+            patient.createProperty("patient_status", OType.INTEGER);
+            patient.createProperty("contact_list", OType.LINKSET);
+            patient.createProperty("event_list", OType.LINKSET);
+            
             patient.createIndex("patient_name_index", OClass.INDEX_TYPE.NOTUNIQUE, "patient_mrn");
         }
 
@@ -103,8 +112,8 @@ public class GraphDBEngine {
             patient.createIndex("vacc_id_index", OClass.INDEX_TYPE.NOTUNIQUE, "vacc_id");
         }
 
-        if (db.getClass("distributor") == null) {
-            db.createEdgeClass("distributor");
+        if (db.getClass("recipient") == null) {
+            db.createEdgeClass("recipient");
         }
     }
 
@@ -128,6 +137,68 @@ public class GraphDBEngine {
         }
     }
 
+
+    public void createContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
+        
+        String queryContactMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
+        String queryContactPatEdges = "SELECT FROM contact_with WHERE to = ? AND from = ?";
+
+        for (String item:PatientData.contact_list ){
+
+            OResultSet ContactID = database.query(queryContactMRNs, item);
+
+            OVertex Contact;
+
+            if(ContactID.hasNext()){
+                Contact = ContactID.next().getVertex().get();
+            } else {
+                Contact = database.newVertex("patient");
+                Contact.setProperty("patient_mrn", item);
+                Contact.save();
+            }
+            ContactID.close();
+
+            OResultSet ContactPatEdge = database.query(queryContactPatEdges, PatientNode, Contact);
+            if(!ContactPatEdge.hasNext()){
+                OEdge edge = PatientNode.addEdge(Contact, "contact_with");
+                edge.save();
+            }
+            ContactPatEdge.close();
+
+        }
+    }
+
+    public void createEventEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
+
+        String queryEventIDs = "SELECT FROM event WHERE event_id = ?";
+        String queryEventPatEdges = "SELECT FROM participant WHERE to = ? AND from = ?";
+
+        for (String item:PatientData.event_list ){
+
+            OResultSet eventID = database.query(queryEventIDs, item);
+
+            OVertex event;
+
+            if(eventID.hasNext()){
+                event = eventID.next().getVertex().get();
+            } else {
+                event = database.newVertex("event");
+                event.setProperty("event_id", item);
+                event.save();
+            }
+            eventID.close();
+
+            OResultSet eventPatEdge = database.query(queryEventPatEdges, PatientNode, event);
+            if(!eventPatEdge.hasNext()){
+                OEdge edge = PatientNode.addEdge(event, "participant");
+                edge.save();
+            }
+            eventPatEdge.close();
+
+
+        }
+    }
+
     //general case to add a patient
     public void createPatient(PatientData newPatient, ODatabaseSession database){
         
@@ -143,7 +214,7 @@ public class GraphDBEngine {
             PatientBuffer.setProperty("patient_status", newPatient.patient_status);
             PatientBuffer.setProperty("contact_list", newPatient.contact_list);
             PatientBuffer.setProperty("event_list", newPatient.event_list);
-            PatientBuffer.setProperty("patient_status",0);
+            PatientBuffer.setProperty("patient_status",newPatient.patient_status);
             PatientBuffer.save();
         }
 
@@ -169,14 +240,50 @@ public class GraphDBEngine {
         createPatient(newPatient,database);
     }
 
-    public void addHosPatEdges(HospitalData hospitalData){
+    //Handles HospPatData inputs
+    public void addHospPatEdges(HospPatData hospPatData, ODatabaseSession database){
+        String queryHospitalIDs = "SELECT FROM hospital WHERE hospital_id = ?";
+        String queryPatientMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
+        String queryHospPatEdges = "SELECT FROM patient_at WHERE to = ? AND from = ?";
+        OResultSet hospitalID = database.query(queryHospitalIDs, hospPatData.hospital_id);
+        OResultSet patientID = database.query(queryPatientMRNs, hospPatData.patient_mrn);
+
+        OVertex hospital;
+        OVertex patient;
+
+        if(hospitalID.hasNext()){
+            hospital = hospitalID.next().getVertex().get();
+        } else {
+            hospital = database.newVertex("hospital");
+            hospital.setProperty("hospital_id", hospPatData.hospital_id);
+            hospital.save();
+        }
+        hospitalID.close();
+
+        if(patientID.hasNext()){
+            patient = patientID.next().getVertex().get();
+        } else {
+            patient = database.newVertex("patient");
+            patient.setProperty("patient_mrn", hospPatData.patient_mrn);
+            patient.setProperty("patient_status", hospPatData.patient_status);
+            patient.setProperty("patient_name", hospPatData.patient_name);
+            patient.save();
+        }
+        patientID.close();
+        
+        OResultSet HospPatEdges = database.query(queryHospPatEdges, patient, hospital);
+        if(!HospPatEdges.hasNext()){
+            OEdge edge = patient.addEdge(hospital, "patient_at");
+            edge.save();
+        }
+        HospPatEdges.close();
 
     }
 
     //general case to add a hospital
     public void createHospital(HospitalData newhospital, ODatabaseSession database){
         
-        String query = "SELECT FROM hospital WHERE hospital_mrn = ?";
+        String query = "SELECT FROM hospital WHERE hospital_id = ?";
         OResultSet result = database.query(query, newhospital.id);
 
         if(!result.hasNext()){
@@ -232,10 +339,49 @@ public class GraphDBEngine {
         createHospital(newhospital,database);
     }
 
+
+    public void createVaccPatEdge(VaccineData vaccineData,ODatabaseSession database){
+        String queryVaccineIDs = "SELECT FROM hospital WHERE hospital_id = ?";
+        String queryPatientMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
+        String queryVaccPatEdges = "SELECT FROM patient_at WHERE to = ? AND from = ?";
+        OResultSet vaccineID = database.query(queryVaccineIDs, vaccineData.vaccination_id);
+        OResultSet patientID = database.query(queryPatientMRNs, vaccineData.patient_mrn);
+
+        OVertex vaccine;
+        OVertex patient;
+
+        if(vaccineID.hasNext()){
+            vaccine = vaccineID.next().getVertex().get();
+        } else {
+            vaccine = database.newVertex("vaccine");
+            vaccine.setProperty("vaccine_id", vaccineData.vaccination_id);
+            vaccine.save();
+        }
+        vaccineID.close();
+
+        if(patientID.hasNext()){
+            patient = patientID.next().getVertex().get();
+        } else {
+            patient = database.newVertex("patient");
+            patient.setProperty("patient_mrn", vaccineData.patient_mrn);
+            patient.setProperty("patient_name", vaccineData.patient_name);
+            patient.save();
+        }
+        patientID.close();
+        
+        OResultSet HospPatEdge = database.query(queryVaccPatEdges, patient, vaccine);
+        if(!HospPatEdge.hasNext()){
+            OEdge edge = patient.addEdge(vaccine, "recipient");
+            edge.save();
+        }
+        HospPatEdge.close();
+
+    }
+
     //general case to add a vaccine
     public void createVaccine(VaccineData newvaccine, ODatabaseSession database){
         
-        String query = "SELECT FROM vaccine WHERE vaccine_mrn = ?";
+        String query = "SELECT FROM vaccine WHERE vaccine_id = ?";
         OResultSet result = database.query(query, newvaccine.patient_mrn);
 
         if(!result.hasNext()){
@@ -252,8 +398,9 @@ public class GraphDBEngine {
             vaccineBuffer.setProperty("patient_mrn", newvaccine.patient_mrn);
             vaccineBuffer.setProperty("patient_name", newvaccine.patient_name);
             vaccineBuffer.save();
-
         }
+
+        createVaccPatEdge(newvaccine, database);
 
     }
 
@@ -262,10 +409,6 @@ public class GraphDBEngine {
         Gson gson = new Gson();
         VaccineData newvaccine = gson.fromJson(jsoString, VaccineData.class);
         createVaccine(newvaccine,database);
-    }
-
-    public void createEvent(List<PatientData> Patients, OVertex Patient, ODatabaseSession database){
-
     }
 
 
