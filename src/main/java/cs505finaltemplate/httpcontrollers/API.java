@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,7 +41,7 @@ public class API {
             Map<String,String> responseMap = new HashMap<>();
             responseMap.put("team_name", "Persuasive Trees");
             responseMap.put("Team_members_sids", "[912297061,912267407]");
-            
+
             responseMap.put("app_status_code","0");
 
             responseString = gson.toJson(responseMap);
@@ -126,13 +127,13 @@ public class API {
     }
 
     @GET
-    @Path("/getconfirmedcontacts")
+    @Path("/getconfirmedcontacts/{patient_mrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getconfirmedcontacts() {
+    public Response getconfirmedcontacts(@PathParam("patient_mrn") String patientMRN) {
         String responseString = "{}";
         try{
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("","");
+            responseMap.put("contactlist",Launcher.graphDBEngine.getContacts(patientMRN));
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
@@ -147,11 +148,15 @@ public class API {
     }
 
     @GET
-    @Path("/getpossiblecontacts")
+    @Path("/getpossiblecontacts/{patient_mrn}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getpossiblecontacts() {
+    public Response getpossiblecontacts(@PathParam("patient_mrn") String patientMRN) {
         String responseString = "{}";
-        try{}
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("contactlist",Launcher.graphDBEngine.getEventContacts(patientMRN));
+            responseString = gson.toJson(responseMap);
+        }
         catch (Exception ex){
             StringWriter sw = new StringWriter();
             ex.printStackTrace(new PrintWriter(sw));
@@ -164,12 +169,17 @@ public class API {
     }
 
     @GET
-    @Path("/getpatientstatus")
+    @Path("/getpatientstatus/{hospital_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getpatientstatus() {
+    public Response getpatientstatus(@PathParam("hospital_id") String hospitalID) {
         String responseString = "{}";
-        try{}
+        try{
+            Map<String,String> responseMap = new HashMap<>();
+            responseMap.put("","");
+            responseString = gson.toJson(responseMap);
+        }
         catch (Exception ex){
+
             StringWriter sw = new StringWriter();
             ex.printStackTrace(new PrintWriter(sw));
             String exceptionAsString = sw.toString();

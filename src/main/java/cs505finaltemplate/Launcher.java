@@ -64,7 +64,7 @@ public class Launcher {
         Map<String,String> message_config = new HashMap<>();
         message_config.put("hostname","url\":\"http://ajta238.cs.uky.edu"); //Fill config for your team in
         message_config.put("port","9999"); //
-        message_config.put("username","912297061", "912267407");
+        message_config.put("username","912297061,912267407");
         message_config.put("password","");
         message_config.put("virtualhost","20");
 

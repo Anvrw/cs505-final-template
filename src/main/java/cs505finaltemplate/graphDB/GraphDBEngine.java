@@ -8,6 +8,8 @@ import cs505finaltemplate.Topics.HospPatData;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
@@ -408,19 +410,115 @@ public class GraphDBEngine {
         orient.close();
     }
 
-    private void getContacts(ODatabaseSession db, String patient_mrn) {
+    public String getContacts(String patient_mrn) {
 
-        String query = "TRAVERSE inE(), outE(), inV(), outV() " +
+        OrientDB orient;
+        ODatabaseSession database;
+        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, "root", "rootpwd");
+
+        String queryTraversal = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
-        OResultSet rs = db.query(query, patient_mrn);
+        String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
-        while (rs.hasNext()) {
-            OResult item = rs.next();
-            System.out.println("contact: " + item.getProperty("patient_mrn"));
+        OResultSet traversal = database.query(queryTraversal, patient_mrn);
+        OResultSet patient = database.query(queryPatient, patient_mrn);
+
+        if(!traversal.hasNext()){
+            traversal.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+            database.close();
+            orient.close();
+            if(!patient.hasNext()){
+                patient.close();
+                return "Patient has no contacts.";
+            } else {
+                patient.close();
+                return "Patient does not exist.";
+            }
+        }
+        patient.close();
+
+        List<String> contactList = new ArrayList<>();
+
+        while (traversal.hasNext()) {
+            OResult item = traversal.next();
+            contactList.add(item.getProperty("patient_mrn"));
         }
 
-        rs.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        traversal.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        database.close();
+        orient.close();
+
+        Gson gson = new Gson();
+        return gson.toJson(contactList);
+    }
+
+    public String getEventContacts(String patient_mrn) {
+
+        OrientDB orient;
+        ODatabaseSession database;
+        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, "root", "rootpwd");
+
+        String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
+                "FROM (select from patient where patient_mrn = ?) " +
+                "WHILE $depth <= 2";
+        String queryTravEvent = "TRAVERSE inE(), outE(), inV(), outV() " +
+                "FROM (select from event where event_id = ?) " +
+                "WHILE $depth <= 2";
+        String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
+
+        OResultSet travPat = database.query(queryTravPat, patient_mrn);
+        OResultSet patient = database.query(queryPatient, patient_mrn);
+
+        if(!travPat.hasNext()){
+            travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+            database.close();
+            orient.close();
+            if(!patient.hasNext()){
+                patient.close();
+                return "Patient has no contacts.";
+            } else {
+                patient.close();
+                return "Patient does not exist.";
+            }
+        }
+        patient.close();
+
+        List<HashMap<String,List<String>>> contactList = new ArrayList<>();
+
+        int i = 1;
+        while (travPat.hasNext()) {
+           
+            OResult eventItem = travPat.next();
+
+            if(eventItem.hasProperty("event_id") && eventItem.getProperty("event_id") != ""){
+                HashMap<String,List<String>> shortMap = new HashMap<>();
+                List<String> shortList = new ArrayList<>();
+
+                String eventID = eventItem.getProperty("event_id");
+                OResultSet travEvent = database.query(queryTravEvent,eventID);
+                
+                while(travEvent.hasNext()){
+                    OResult patItem = travEvent.next();
+
+                    if(patItem.hasProperty("patient_mrn") 
+                    && !patient_mrn.equals(patItem.getProperty("patient_mrn"))){
+                        shortList.add(patItem.getProperty("patient_mrn"));
+                    }
+                }
+                shortMap.put(String.valueOf(i),shortList);
+                contactList.add(shortMap);
+            }  
+        }
+
+        travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        database.close();
+        orient.close();
+
+        Gson gson = new Gson();
+        return gson.toJson(contactList);
     }
 
     
