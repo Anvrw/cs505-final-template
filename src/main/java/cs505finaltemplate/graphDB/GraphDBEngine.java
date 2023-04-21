@@ -11,6 +11,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.text.DecimalFormat;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
 import com.orientechnologies.orient.core.db.ODatabaseType;
@@ -418,7 +419,7 @@ public class GraphDBEngine {
         database = orient.open(databaseName, "root", "rootpwd");
 
         String queryTraversal = "TRAVERSE inE(), outE(), inV(), outV() " +
-                "FROM (select from patient where patient_mrn = ?) c" +
+                "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
         String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
@@ -478,7 +479,7 @@ public class GraphDBEngine {
             orient.close();
             if(!patient.hasNext()){
                 patient.close();
-                return "Patient has no contacts.";
+                return "Patient has no events attended.";
             } else {
                 patient.close();
                 return "Patient does not exist.";
@@ -491,29 +492,30 @@ public class GraphDBEngine {
         int i = 1;
         while (travPat.hasNext()) {
            
-            OResult eventItem = travPat.next();
+            OResult patItem = travPat.next();
 
-            if(eventItem.hasProperty("event_id") && eventItem.getProperty("event_id") != ""){
+            if(patItem.hasProperty("event_id") && patItem.getProperty("event_id") != ""){
                 HashMap<String,List<String>> shortMap = new HashMap<>();
                 List<String> shortList = new ArrayList<>();
 
-                String eventID = eventItem.getProperty("event_id");
-                OResultSet travEvent = database.query(queryTravEvent,eventID);
+                String eventID = patItem.getProperty("event_id");
+                OResultSet travPat = database.query(queryTravEvent,eventID);
                 
-                while(travEvent.hasNext()){
-                    OResult patItem = travEvent.next();
+                while(travPat.hasNext()){
+                    OResult patItem = travPat.next();
 
                     if(patItem.hasProperty("patient_mrn") 
                     && !patient_mrn.equals(patItem.getProperty("patient_mrn"))){
                         shortList.add(patItem.getProperty("patient_mrn"));
                     }
                 }
+                travPat.close();
                 shortMap.put(String.valueOf(i),shortList);
                 contactList.add(shortMap);
             }  
         }
 
-        travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        travEvent.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
         database.close();
         orient.close();
 
@@ -521,228 +523,242 @@ public class GraphDBEngine {
         return gson.toJson(contactList);
     }
 
-    public String getEventContacts(String hospital_id) {
+    public HashMap<String,String> getHospitalInfo(String hospital_id) {
 
         OrientDB orient;
         ODatabaseSession database;
         orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
 
-        String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
+        String queryTravHosp = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from hospital where id = ?) " +
                 "WHILE $depth <= 2";
-        String queryTravEvent = "TRAVERSE inE(), outE(), inV(), outV() " +
-                "FROM (select from event where event_id = ?) " +
+        String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
+                "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
         String queryHospital = "SELECT FROM hospital WHERE id = ?";
 
-        OResultSet travPat = database.query(queryTravPat, hospital_id);
-        OResultSet hospitalID = database.query(queryPat, hospital_id);
+        OResultSet travHosp = database.query(queryTravHosp, hospital_id);
+        OResultSet hospitalID = database.query(queryHospital, hospital_id);
 
-        if(!travPat.hasNext()){
-            travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        if(!travHosp.hasNext()){
+            travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
-            if(!hospital.hasNext()){
-                patient.close();
-                return "Hospital has no contacts.";
+            if(!hospitalID.hasNext()){
+                hospitalID.close();
+                HashMap<String,String> errOut = new HashMap<String,String>();
+                errOut.put("","Hospital does not exist.");
+                return errOut;
             } else {
-                patient.close();
-                return "Hospital does not exist.";
+                hospitalID.close();
+                HashMap<String,String> errOut = new HashMap<String,String>();
+                errOut.put("","Hospital has no patients.");
+                return errOut;
             }
         }
-        hosptial.close();
+        hospitalID.close();
 
         int inPatientCount = 0;
         int icuPatientCount = 0;
         int ventPatientCount = 0;
-        int vaccinatedInPatientCount = 0;
-        int vaccinatedIcuPatientCount = 0;
-        int vaccinatedVentPatientCount = 0;
+        int vaccInPatientCount = 0;
+        int vaccIcuPatientCount = 0;
+        int vaccVentPatientCount = 0;
 
-        List<HashMap<String,List<String>>> contactList = new ArrayList<>();
+        HashMap<String,String> hospList = new HashMap<>();
 
-        int i = 1;
-        while (travPat.hasNext()) {
+        while (travHosp.hasNext()) {
+           
+            OResult patItem = travHosp.next();
 
-            OResult eventItem = travPat.next();
+            if(patItem.hasProperty("patient_mrn") && patItem.getProperty("patient_mrn") != ""){
+                int status = patItem.getProperty("patient_status");
 
-            if(eventItem.hasProperty("event_id") && eventItem.getProperty("event_id") != ""){
-                HashMap<String,List<String>> shortMap = new HashMap<>();
-                List<String> shortList = new ArrayList<>();
+                String patID = patItem.getProperty("patient_mrn");
+                OResultSet travPat = database.query(queryTravPat,patID);
+                
+                int vaccStatus = 0;
+                while(travPat.hasNext()){
+                    OResult vaccItem = travPat.next();
 
-                String eventID = eventItem.getProperty("event_id");
-                OResultSet travEvent = database.query(queryTravEvent,eventID);
-
-                while(travEvent.hasNext()){
-                    OResult patItem = travEvent.next();
-
-                    if(patItem.hasProperty("patient_mrn"){
-                        if(patItem.hasProperty("patient_status")){
-                            String patientStatus = patItem.getProperty("patient_status");
-
-                            if(patientStatus.equals("in-patient")){
-                                inPatientCount++;
-
-                                if(patItem.hasProperty("vaccination_status") && patItem.getProperty("vaccination_status").equals("vaccinated")){
-                                    vaccinatedInPatientCount++;
-                                }
-                            }else if(patientStatus.equals("icu-patient")){
-                                icuPatientCount++;
-                                if(patItem.hasProperty("vaccination_status") && patItem.getProperty("vaccination_status").equals("vaccinated")){
-                                    vaccinatedIcuPatientCount++;
-                                }
-                            }else if(patientStatus.equals("patient-vent")){
-                                ventPatientCount++;
-                                if(patItem.hasPropety("vaccination_status") && patItem.getProperty("vaccination_status").equals(vaccinated)){
-                                    vaccinatedVentPatientCount++;
-                                }
-                            }
-                        }
+                    if(vaccItem.hasProperty("testing_id") 
+                    && patID.equals(vaccItem.getProperty("patient_mrn"))
+                    && vaccItem.getProperty("testing_id") != ""){
+                        vaccStatus = 3;
                     }
                 }
-                shortMap.put(String.valueOf(i),shortList);
-                contactList.add(shortMap);
-            }
-        }
+                travPat.close();
 
-        travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+
+                switch(status+vaccStatus){
+                    case 1:
+                        inPatientCount+=1;
+                    break;
+                    case 2:
+                        icuPatientCount+=1;
+                    break;
+                    case 3:
+                        ventPatientCount+=1;
+                    break;
+                    case 4:
+                        vaccInPatientCount+=1;
+                    break;
+                    case 5:
+                        vaccIcuPatientCount+=1;
+                    break;
+                    case 6:
+                        vaccVentPatientCount+=1;
+                    break;
+                    default:
+                    break;
+                }
+            }  
+        }
+    
+        travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
         database.close();
         orient.close();
 
-        double inPatientVaxPercentage = inPatientCount > 0 ? (double) vaccinatedInPatientCount / inPatientCount : 0;
-        double icuPatientVaxPercentage = icuPatientCount > 0 ? (double) vaccinatedIcuPatientCount / icuPatientCount : 0;
-        double patientVentVaxPercentage = patientVentCount > 0 ? (double) vaccinatedVentPatientCount / ventPatientCount : 0;
+        DecimalFormat percForm = new DecimalFormat("#.##");
 
+        hospList.put("in-patient_count",String.valueOf(inPatientCount));
+        String vaccInPerc = String.valueOf(((double) vaccInPatientCount)/((double) inPatientCount));
+        hospList.put("in-patient_vax",percForm.format(vaccInPerc));
 
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("hospital_id", hospital_id);
-        jsonObject.addProperty("in_patient_count", inPatientCount);
-        jsonObject.addProperty("icu_patient_count", icuPatientCount);
-        jsonObject.addProperty("patient_vent_count", ventPatientCount);
-        jsonObject.addProperty("vaccinated_in_patients", vaccinatedInPatientCount);
-        jsonObject.addProperty("vaccinated_icu_patients", vaccinatedIcuPatientCount);
-        jsonObject.addProperty("vaccinated_patients_on_vent", vaccinatedVentPatientCount);
-        jsonObject.addProperty("in_patient_vax_percentage", inPatientVaxPercentage);
-        jsonObject.addProperty("icu_patient_vax_percentage", icuPatientVaxPercentage);
-        jsonObject.addProperty("patient_vent_vax_percentage", patientVentVaxPercentage);
+        hospList.put("icu-patient_count",String.valueOf(icuPatientCount));
+        String vaccIcuPerc = String.valueOf(((double) vaccIcuPatientCount)/((double) icuPatientCount));
+        hospList.put("icu-patient_vax",percForm.format(vaccIcuPerc));
 
-        return jsonObject.toString();
+        hospList.put("patient_vent_count",String.valueOf(ventPatientCount));
+        String vaccVentPerc = String.valueOf(((double) vaccVentPatientCount)/((double) ventPatientCount));
+        hospList.put("patient_vent_vax",percForm.format(vaccVentPerc));
 
-        Gson gson = new Gson();
-        return gson.toJson(contactList);
+        return hospList;
     }
 
-    public String getEventContacts(String hospital_id) {
+    public HashMap<String,String> getTotalHospitalInfo() {
 
         OrientDB orient;
         ODatabaseSession database;
         orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
 
-        String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
+        String queryTravHosp = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from hospital where id = ?) " +
                 "WHILE $depth <= 2";
-        String queryTravEvent = "TRAVERSE inE(), outE(), inV(), outV() " +
-                "FROM (select from event where event_id = ?) " +
+        String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
+                "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
-        String queryHospital = "SELECT *FROM hospital WHERE id = ?";
-
-        OResultSet travPat = database.query(queryTravPat, hospital_id);
-        OResultSet hospitalID = database.query(queryPat, hospital_id);
-
-        if(!travPat.hasNext()){
-            travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
-            database.close();
-            orient.close();
-            if(!hospital.hasNext()){
-                patient.close();
-                return "Hospital has no contacts.";
-            } else {
-                patient.close();
-                return "Hospital does not exist.";
-            }
-        }
-        hosptial.close();
+        String queryHospitals = "SELECT FROM hospital ORDER BY id DESC";
+        String queryHospital = "SELECT FROM hospital WHERE id = ?";
 
         int inPatientCount = 0;
         int icuPatientCount = 0;
         int ventPatientCount = 0;
-        int vaccinatedInPatientCount = 0;
-        int vaccinatedIcuPatientCount = 0;
-        int vaccinatedVentPatientCount = 0;
+        int vaccInPatientCount = 0;
+        int vaccIcuPatientCount = 0;
+        int vaccVentPatientCount = 0;
 
-        List<HashMap<String,List<String>>> contactList = new ArrayList<>();
+        OResultSet hospitals = database.query(queryHospitals, "");
 
-        int i = 1;
-        while (travPat.hasNext()) {
+        while(hospitals.hasNext()){
+        
+        OResult currHospital = hospitals.next();
+        String hospital_id = currHospital.getProperty("id");
 
-            OResult eventItem = travPat.next();
+        OResultSet travHosp = database.query(queryTravHosp, hospital_id);
+        OResultSet hospitalID = database.query(queryHospital, hospital_id);
 
-            if(eventItem.hasProperty("event_id") && eventItem.getProperty("event_id") != ""){
-                HashMap<String,List<String>> shortMap = new HashMap<>();
-                List<String> shortList = new ArrayList<>();
-
-                String eventID = eventItem.getProperty("event_id");
-                OResultSet travEvent = database.query(queryTravEvent,eventID);
-
-                while(travEvent.hasNext()){
-                    OResult patItem = travEvent.next();
-
-                    if(patItem.hasProperty("patient_mrn"){
-                        if(patItem.hasProperty("patient_status")){
-                            String patientStatus = patItem.getProperty("patient_status");
-
-                            if(patientStatus.equals("in-patient")){
-                                inPatientCount++;
-
-                                if(patItem.hasProperty("vaccination_status") && patItem.getProperty("vaccination_status").equals("vaccinated")){
-                                    vaccinatedInPatientCount++;
-                                }
-                            }else if(patientStatus.equals("icu-patient")){
-                                icuPatientCount++;
-                                if(patItem.hasProperty("vaccination_status") && patItem.getProperty("vaccination_status").equals("vaccinated")){
-                                    vaccinatedIcuPatientCount++;
-                                }
-                            }else if(patientStatus.equals("patient-vent")){
-                                ventPatientCount++;
-                                if(patItem.hasPropety("vaccination_status") && patItem.getProperty("vaccination_status").equals(vaccinated)){
-                                    vaccinatedVentPatientCount++;
-                                }
-                            }
-                        }
-                    }
-                }
-                shortMap.put(String.valueOf(i),shortList);
-                contactList.add(shortMap);
+        if(!travHosp.hasNext()){
+            travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+            database.close();
+            orient.close();
+            if(!hospitalID.hasNext()){
+                hospitalID.close();
+                HashMap<String,String> errOut = new HashMap<String,String>();
+                errOut.put("","Hospital does not exist.");
+                return errOut;
+            } else {
+                hospitalID.close();
+                HashMap<String,String> errOut = new HashMap<String,String>();
+                errOut.put("","Hospital has no patients.");
+                return errOut;
             }
         }
+        hospitalID.close();
 
-        travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        while (travHosp.hasNext()) {
+           
+            OResult patItem = travHosp.next();
+
+            if(patItem.hasProperty("patient_mrn") && patItem.getProperty("patient_mrn") != ""){
+                int status = patItem.getProperty("patient_status");
+
+                String patID = patItem.getProperty("patient_mrn");
+                OResultSet travPat = database.query(queryTravPat,patID);
+                
+                int vaccStatus = 0;
+                while(travPat.hasNext()){
+                    OResult vaccItem = travPat.next();
+
+                    if(vaccItem.hasProperty("testing_id") 
+                    && patID.equals(vaccItem.getProperty("patient_mrn"))
+                    && vaccItem.getProperty("testing_id") != ""){
+                        vaccStatus = 3;
+                    }
+                }
+                travPat.close();
+
+
+                switch(status+vaccStatus){
+                    case 1:
+                        inPatientCount+=1;
+                    break;
+                    case 2:
+                        icuPatientCount+=1;
+                    break;
+                    case 3:
+                        ventPatientCount+=1;
+                    break;
+                    case 4:
+                        vaccInPatientCount+=1;
+                    break;
+                    case 5:
+                        vaccIcuPatientCount+=1;
+                    break;
+                    case 6:
+                        vaccVentPatientCount+=1;
+                    break;
+                    default:
+                    break;
+                }
+            }  
+        }
+    
+        travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        }
+        hospitals.close();
         database.close();
         orient.close();
 
-        double inPatientVaxPercentage = inPatientCount > 0 ? (double) vaccinatedInPatientCount / inPatientCount : 0;
-        double icuPatientVaxPercentage = icuPatientCount > 0 ? (double) vaccinatedIcuPatientCount / icuPatientCount : 0;
-        double patientVentVaxPercentage = patientVentCount > 0 ? (double) vaccinatedVentPatientCount / ventPatientCount : 0;
+        HashMap<String,String> hospList = new HashMap<>();
 
+        DecimalFormat percForm = new DecimalFormat("#.##");
 
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("hospital_id", hospital_id);
-        jsonObject.addProperty("in_patient_count", inPatientCount);
-        jsonObject.addProperty("icu_patient_count", icuPatientCount);
-        jsonObject.addProperty("patient_vent_count", ventPatientCount);
-        jsonObject.addProperty("vaccinated_in_patients", vaccinatedInPatientCount);
-        jsonObject.addProperty("vaccinated_icu_patients", vaccinatedIcuPatientCount);
-        jsonObject.addProperty("vaccinated_patients_on_vent", vaccinatedVentPatientCount);
-        jsonObject.addProperty("in_patient_vax_percentage", inPatientVaxPercentage);
-        jsonObject.addProperty("icu_patient_vax_percentage", icuPatientVaxPercentage);
-        jsonObject.addProperty("patient_vent_vax_percentage", patientVentVaxPercentage);
+        hospList.put("in-patient_count",String.valueOf(inPatientCount));
+        String vaccInPerc = String.valueOf(((double) vaccInPatientCount)/((double) inPatientCount));
+        hospList.put("in-patient_vax",percForm.format(vaccInPerc));
 
-        return jsonObject.toString();
+        hospList.put("icu-patient_count",String.valueOf(icuPatientCount));
+        String vaccIcuPerc = String.valueOf(((double) vaccIcuPatientCount)/((double) icuPatientCount));
+        hospList.put("icu-patient_vax",percForm.format(vaccIcuPerc));
 
-        Gson gson = new Gson();
-        return gson.toJson(contactList);
+        hospList.put("patient_vent_count",String.valueOf(ventPatientCount));
+        String vaccVentPerc = String.valueOf(((double) vaccVentPatientCount)/((double) ventPatientCount));
+        hospList.put("patient_vent_vax",percForm.format(vaccVentPerc));
+
+        return hospList;
     }
-
+    
 }

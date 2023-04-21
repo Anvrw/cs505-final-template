@@ -2,6 +2,7 @@ package cs505finaltemplate.httpcontrollers;
 
 import com.google.gson.Gson;
 import cs505finaltemplate.Launcher;
+import cs505finaltemplate.graphDB.GraphDBEngine;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -174,9 +175,10 @@ public class API {
     public Response getpatientstatus(@PathParam("hospital_id") String hospitalID) {
         String responseString = "{}";
         try{
-            Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("","");
-            responseString = gson.toJson(responseMap);
+            if(hospitalID == "")
+                responseString = gson.toJson(Launcher.graphDBEngine.getTotalHospitalInfo());
+            else
+                responseString = gson.toJson(Launcher.graphDBEngine.getHospitalInfo(hospitalID));
         }
         catch (Exception ex){
 
