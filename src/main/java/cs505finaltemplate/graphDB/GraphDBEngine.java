@@ -140,6 +140,7 @@ public class GraphDBEngine {
         }
     }
 
+    //clears the vertexs from each of the data pieces
     private void clearDB(ODatabaseSession db) {
 
         db.command("DELETE VERTEX FROM patient");
@@ -150,6 +151,7 @@ public class GraphDBEngine {
     }
 
 
+    //allows for the contact list to be made from queries from the patient dataset
     public void setContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
         
         String queryContactMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
@@ -315,6 +317,7 @@ public class GraphDBEngine {
     }
 
 
+    //allows for the contact list to be made from queries from the vaccine dataset
     public void setVaccPatEdge(VaccineData vaccineData,ODatabaseSession database){
         String queryVaccineIDs = "SELECT FROM hospital WHERE hospital_id = ?";
         String queryPatientMRNs = "SELECT FROM patient WHERE patient_mrn = ?";
@@ -411,6 +414,7 @@ public class GraphDBEngine {
         orient.close();
     }
 
+    //allows for traversal through multiple datasets, amd selects and populates a JSON at the end of a patient depth scan
     public String getContacts(String patient_mrn) {
 
         OrientDB orient;
@@ -419,7 +423,7 @@ public class GraphDBEngine {
         database = orient.open(databaseName, "root", "rootpwd");
 
         String queryTraversal = "TRAVERSE inE(), outE(), inV(), outV() " +
-                "FROM (select from patient where patient_mrn = ?) " +
+                "FROM (select from patient where patient_mrn = ?) c" +
                 "WHILE $depth <= 2";
         String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
