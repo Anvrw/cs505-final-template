@@ -42,7 +42,7 @@ public class Launcher {
         System.out.println("Starting CEP...");
 
         inputStreamName = "testInStream";
-        String inputStreamAttributesString = "zip_code string";
+        String inputStreamAttributesString = "zip_code string, count long";
 
         String outputStreamName = "testOutStream";
         String outputStreamAttributesString = "zip_code string, count long";
@@ -52,7 +52,7 @@ public class Launcher {
         String queryString = " " +
                 "from testInStream#window.timeBatch(5 sec) " +
                 "select zip_code, count() as count " +
-                "group by zip_code" +
+                "group by zip_code " +
                 "insert into testOutStream; ";
 
         cepEngine.createCEP(inputStreamName, outputStreamName, inputStreamAttributesString, outputStreamAttributesString, queryString);
@@ -62,11 +62,11 @@ public class Launcher {
 
         //start message collector
         Map<String,String> message_config = new HashMap<>();
-        message_config.put("hostname","url\":\"http://ajta238.cs.uky.edu"); //Fill config for your team in
-        message_config.put("port","2424"); //
-        //message_config.put("username","912297061,912267407");
-        message_config.put("password","");
-        message_config.put("virtualhost","20");
+        message_config.put("hostname","http://ajta238.cs.uky.edu"); //Fill config for your team in
+        message_config.put("port","5672"); //
+        message_config.put("username","root");
+        message_config.put("password","rootpwd");
+        message_config.put("virtualhost","/");
 
         topicConnector = new TopicConnector(message_config);
         topicConnector.connect();

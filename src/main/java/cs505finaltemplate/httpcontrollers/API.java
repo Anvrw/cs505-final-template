@@ -43,8 +43,11 @@ public class API {
             responseMap.put("team_name", "Persuasive Trees");
             responseMap.put("Team_members_sids", "[912297061,912267407]");
 
-            responseMap.put("app_status_code","0");
-
+            if (Launcher.graphDBEngine != null && Launcher.cepEngine != null) {
+                responseMap.put("app_status_code", String.valueOf(1));
+            } else {
+                responseMap.put("app_status_code", String.valueOf(0));
+            }
             responseString = gson.toJson(responseMap);
 
 

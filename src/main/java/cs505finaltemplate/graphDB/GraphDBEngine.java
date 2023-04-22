@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import com.orientechnologies.orient.core.db.ODatabaseSession;
 import com.orientechnologies.orient.core.db.ODatabaseType;
@@ -39,11 +40,11 @@ public class GraphDBEngine {
         //see class notes for how to use the dashboard
 
         this.databaseName = databaseName;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
-        orient.create(databaseName, ODatabaseType.PLOCAL);
+        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        clearDB(orient);
         ODatabaseSession db = orient.open(databaseName, "root", "rootpwd");
 
-        clearDB(db);
+        //clearDB(db);
 
         //create classes
         initDB(db);
@@ -52,6 +53,8 @@ public class GraphDBEngine {
         orient.close();
 
     }
+
+
 
     public void initDB(ODatabaseSession db){
         OClass patient = db.getClass("patient");
@@ -63,7 +66,6 @@ public class GraphDBEngine {
         if (patient.getProperty("patient_mrn") == null) {
             patient.createProperty("patient_mrn", OType.STRING);
             patient.createProperty("testing_id", OType.INTEGER);
-            patient.createProperty("patient_mrn", OType.STRING);
             patient.createProperty("patient_name", OType.STRING);
             patient.createProperty("patient_zipcode", OType.INTEGER);
             patient.createProperty("patient_status", OType.INTEGER);
@@ -120,33 +122,32 @@ public class GraphDBEngine {
         }
     }
 
-    //Only used in the /reset function as a part of the API
-    public boolean resetDB(){
-        try{
-            OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        //clears the vertexs from each of the data pieces
+    private boolean clearDB(OrientDB orient) {
 
-            if(database.exists(databaseName)){
-                database.drop(databaseName);
+        try{
+    
+            if(orient.exists(databaseName)){
+                orient.drop(databaseName);
             }
-            database.create(databaseName, ODatabaseType.PLOCAL);
-            database.close();
+            orient.create(databaseName, ODatabaseType.PLOCAL);
+            orient.close();
             return true;
-        }
+            }
         catch(Exception e){
             StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             e.printStackTrace();
             return false;
-        }
+        } 
     }
 
-    //clears the vertexs from each of the data pieces
-    private void clearDB(ODatabaseSession db) {
+    //Only used in the /reset function as a part of the API
+    public boolean resetDB(){
+        
+        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
 
-        db.command("DELETE VERTEX FROM patient");
-        db.command("DELETE VERTEX FROM hospital");
-        db.command("DELETE VERTEX FROM event");
-        db.command("DELETE VERTEX FROM vacc");
+        return clearDB(database);
 
     }
 
@@ -492,6 +493,7 @@ public class GraphDBEngine {
         patient.close();
 
         List<HashMap<String,List<String>>> contactList = new ArrayList<>();
+        DecimalFormat threeSigForm = new DecimalFormat("###");
 
         int i = 1;
         while (travPat.hasNext()) {
@@ -503,23 +505,23 @@ public class GraphDBEngine {
                 List<String> shortList = new ArrayList<>();
 
                 String eventID = patItem.getProperty("event_id");
-                OResultSet travPat = database.query(queryTravEvent,eventID);
+                OResultSet travEvent = database.query(queryTravEvent,eventID);
                 
-                while(travPat.hasNext()){
-                    OResult patItem = travPat.next();
+                while(travEvent.hasNext()){
+                    OResult patEvent = travEvent.next();
 
-                    if(patItem.hasProperty("patient_mrn") 
-                    && !patient_mrn.equals(patItem.getProperty("patient_mrn"))){
-                        shortList.add(patItem.getProperty("patient_mrn"));
+                    if(patEvent.hasProperty("patient_mrn") 
+                    && !patient_mrn.equals(patEvent.getProperty("patient_mrn"))){
+                        shortList.add(patEvent.getProperty("patient_mrn"));
                     }
                 }
-                travPat.close();
-                shortMap.put(String.valueOf(i),shortList);
+                travEvent.close();
+                shortMap.put(threeSigForm.format(String.valueOf(i)),shortList);
                 contactList.add(shortMap);
             }  
         }
 
-        travEvent.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
         database.close();
         orient.close();
 
