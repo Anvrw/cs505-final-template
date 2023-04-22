@@ -42,7 +42,7 @@ public class Launcher {
         System.out.println("Starting CEP...");
 
         inputStreamName = "testInStream";
-        String inputStreamAttributesString = "zip_code string, count long";
+        String inputStreamAttributesString = "zip_code string";
 
         String outputStreamName = "testOutStream";
         String outputStreamAttributesString = "zip_code string, count long";
