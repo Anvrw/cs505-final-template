@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Added Multiple Functions: getEventContacts for hospital_id and for all hospital_id's">
+    <list default="true" id="529fb449-058d-41bb-83d3-6cf665129ed9" name="Changes" comment="Added Multiple Comments">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/graphDB/GraphDBEngine.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cs505finaltemplate/graphDB/GraphDBEngine.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +75,14 @@
       <option name="project" value="LOCAL" />
       <updated>1681945303535</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added Multiple Comments">
+      <created>1682039085312</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1682039085312</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -125,6 +131,7 @@
     <MESSAGE value="Changed setvaccine and all mentions to setVaccine" />
     <MESSAGE value="Changed setvaccine to setVaccine" />
     <MESSAGE value="Added Multiple Functions: getEventContacts for hospital_id and for all hospital_id's" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Multiple Functions: getEventContacts for hospital_id and for all hospital_id's" />
+    <MESSAGE value="Added Multiple Comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Multiple Comments" />
   </component>
 </project>

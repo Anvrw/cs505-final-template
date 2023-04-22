@@ -424,7 +424,7 @@ public class GraphDBEngine {
         database = orient.open(databaseName, "root", "rootpwd");
 
         String queryTraversal = "TRAVERSE inE(), outE(), inV(), outV() " +
-                "FROM (select from patient where patient_mrn = ?) c" +
+                "FROM (select from patient where patient_mrn = ?)" +
                 "WHILE $depth <= 2";
         String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
