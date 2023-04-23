@@ -126,12 +126,10 @@ public class GraphDBEngine {
     private boolean clearDB(OrientDB orient) {
 
         try{
-    
             if(orient.exists(databaseName)){
                 orient.drop(databaseName);
             }
             orient.create(databaseName, ODatabaseType.PLOCAL);
-            orient.close();
             return true;
             }
         catch(Exception e){
@@ -146,9 +144,10 @@ public class GraphDBEngine {
     public boolean resetDB(){
         
         OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        boolean out = clearDB(database);
+        database.close();
 
-        return clearDB(database);
-
+        return out;
     }
 
 
