@@ -33,7 +33,7 @@ public class Launcher {
         //startig DB/CEP init
 
         //READ CLASS COMMENTS BEFORE USING
-        graphDBEngine = new GraphDBEngine("Connections");
+        graphDBEngine = new GraphDBEngine("Connections","remote:cajo253.cs.uky.edu","root","rootpwd");
         
         System.out.println("Embedded Database Started...");
 

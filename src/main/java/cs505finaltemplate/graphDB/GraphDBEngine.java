@@ -30,8 +30,11 @@ import com.google.gson.Gson;
 public class GraphDBEngine {
 
     private String databaseName;
+    private String databaseLink;
+    private String databaseUsrn;
+    private String databasePass;
 
-    public GraphDBEngine(String databaseName) {
+    public GraphDBEngine(String databaseName, String databaseLink, String databaseUsrn, String databasePass) {
 
         //launch a docker container for orientdb, don't expect your data to be saved unless you configure a volume
         //docker run -d --name orientdb -p 2424:2424 -p 2480:2480 -e ORIENTDB_ROOT_PASSWORD=rootpwd orientdb:3.0.0
@@ -40,9 +43,12 @@ public class GraphDBEngine {
         //see class notes for how to use the dashboard
 
         this.databaseName = databaseName;
-        OrientDB orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        this.databaseLink = databaseLink;
+        this.databaseUsrn = databaseUsrn;
+        this.databasePass = databasePass;
+        OrientDB orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
         clearDB(orient);
-        ODatabaseSession db = orient.open(databaseName, "root", "rootpwd");
+        ODatabaseSession db = orient.open(databaseName, databaseUsrn, databasePass);
 
         //clearDB(db);
 
@@ -143,7 +149,7 @@ public class GraphDBEngine {
     //Only used in the /reset function as a part of the API
     public boolean resetDB(){
         
-        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
+        OrientDB database = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
         boolean out = clearDB(database);
         database.close();
 
@@ -387,8 +393,8 @@ public class GraphDBEngine {
 
         OrientDB orient;
         ODatabaseSession database;
-        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+        orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, databaseUsrn, databasePass);
 
 
         switch(type){
@@ -417,8 +423,8 @@ public class GraphDBEngine {
 
         OrientDB orient;
         ODatabaseSession database;
-        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+        orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, databaseUsrn, databasePass);
 
         String queryTraversal = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from patient where patient_mrn = ?)" +
@@ -458,8 +464,8 @@ public class GraphDBEngine {
         OrientDB orient;
         ODatabaseSession database;
         Gson gson = new Gson();
-        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+        orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, databaseUsrn, databasePass);
 
         String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from patient where patient_mrn = ?) " +
@@ -523,8 +529,8 @@ public class GraphDBEngine {
 
         OrientDB orient;
         ODatabaseSession database;
-        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+        orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, databaseUsrn, databasePass);
 
         String queryTravHosp = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from hospital where id = ?) " +
@@ -636,8 +642,8 @@ public class GraphDBEngine {
 
         OrientDB orient;
         ODatabaseSession database;
-        orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
-        database = orient.open(databaseName, "root", "rootpwd");
+        orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        database = orient.open(databaseName, databaseUsrn, databasePass);
 
         String queryTravHosp = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from hospital where id = ?) " +
