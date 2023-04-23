@@ -143,13 +143,12 @@ public class GraphDBEngine {
     //Only used in the /reset function as a part of the API
     public boolean resetDB(){
         
-        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", OrientDBConfig.defaultConfig());
+        OrientDB database = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
         boolean out = clearDB(database);
         database.close();
 
         return out;
     }
-
 
     //allows for the contact list to be made from queries from the patient dataset
     public void setContactEdge(PatientData PatientData, OVertex PatientNode, ODatabaseSession database){
@@ -316,7 +315,6 @@ public class GraphDBEngine {
         setHospPat(newhospital,database);
     }
 
-
     //allows for the contact list to be made from queries from the vaccine dataset
     public void setVaccPatEdge(VaccineData vaccineData,ODatabaseSession database){
         String queryVaccineIDs = "SELECT FROM hospital WHERE hospital_id = ?";
@@ -415,7 +413,7 @@ public class GraphDBEngine {
     }
 
     //allows for traversal through multiple datasets, amd selects and populates a JSON at the end of a patient depth scan
-    public String getContacts(String patient_mrn) {
+    public List<String> getContacts(String patient_mrn) {
 
         OrientDB orient;
         ODatabaseSession database;
@@ -434,13 +432,10 @@ public class GraphDBEngine {
             traversal.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
-            if(!patient.hasNext()){
-                patient.close();
-                return "Patient has no contacts.";
-            } else {
-                patient.close();
-                return "Patient does not exist.";
-            }
+
+            List<String> errOut = new ArrayList<>();
+            errOut.add("");
+            return errOut;
         }
         patient.close();
 
@@ -455,14 +450,14 @@ public class GraphDBEngine {
         database.close();
         orient.close();
 
-        Gson gson = new Gson();
-        return gson.toJson(contactList);
+        return contactList;
     }
 
-    public String getEventContacts(String patient_mrn) {
+    public List<String> getEventContacts(String patient_mrn) {
 
         OrientDB orient;
         ODatabaseSession database;
+        Gson gson = new Gson();
         orient = new OrientDB("remote:ajta238.cs.uky.edu", "root", "rootpwd", OrientDBConfig.defaultConfig());
         database = orient.open(databaseName, "root", "rootpwd");
 
@@ -481,18 +476,15 @@ public class GraphDBEngine {
             travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
-            if(!patient.hasNext()){
-                patient.close();
-                return "Patient has no events attended.";
-            } else {
-                patient.close();
-                return "Patient does not exist.";
-            }
+
+            List<String> errOut = new ArrayList<>();
+            errOut.add("[{000:[]}]");
+            return errOut;
         }
         patient.close();
 
-        List<HashMap<String,List<String>>> contactList = new ArrayList<>();
-        DecimalFormat threeSigForm = new DecimalFormat("###");
+        List<String> contactList = new ArrayList<>();
+        DecimalFormat threeSigForm = new DecimalFormat("000");
 
         int i = 1;
         while (travPat.hasNext()) {
@@ -500,7 +492,7 @@ public class GraphDBEngine {
             OResult patItem = travPat.next();
 
             if(patItem.hasProperty("event_id") && patItem.getProperty("event_id") != ""){
-                HashMap<String,List<String>> shortMap = new HashMap<>();
+                HashMap<String,String> shortMap = new HashMap<>();
                 List<String> shortList = new ArrayList<>();
 
                 String eventID = patItem.getProperty("event_id");
@@ -515,8 +507,8 @@ public class GraphDBEngine {
                     }
                 }
                 travEvent.close();
-                shortMap.put(threeSigForm.format(String.valueOf(i)),shortList);
-                contactList.add(shortMap);
+                shortMap.put(threeSigForm.format(i),gson.toJson(shortList));
+                contactList.add(gson.toJson(shortMap));
             }  
         }
 
@@ -524,8 +516,7 @@ public class GraphDBEngine {
         database.close();
         orient.close();
 
-        Gson gson = new Gson();
-        return gson.toJson(contactList);
+        return contactList;
     }
 
     public HashMap<String,String> getHospitalInfo(String hospital_id) {
@@ -541,28 +532,27 @@ public class GraphDBEngine {
         String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
-        String queryHospital = "SELECT FROM hospital WHERE id = ?";
 
         OResultSet travHosp = database.query(queryTravHosp, hospital_id);
-        OResultSet hospitalID = database.query(queryHospital, hospital_id);
 
         if(!travHosp.hasNext()){
             travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
-            if(!hospitalID.hasNext()){
-                hospitalID.close();
-                HashMap<String,String> errOut = new HashMap<String,String>();
-                errOut.put("","Hospital does not exist.");
-                return errOut;
-            } else {
-                hospitalID.close();
-                HashMap<String,String> errOut = new HashMap<String,String>();
-                errOut.put("","Hospital has no patients.");
-                return errOut;
-            }
+
+            HashMap<String,String> errOut = new HashMap<String,String>();
+
+            errOut.put("in-patient_count",String.valueOf("-1"));
+            errOut.put("in-patient_vax",String.valueOf("-1"));
+
+            errOut.put("icu-patient_count",String.valueOf("-1"));
+            errOut.put("icu-patient_vax",String.valueOf("-1"));
+
+            errOut.put("patient_vent_count",String.valueOf("-1"));
+            errOut.put("patient_vent_vax",String.valueOf("-1"));
+
+            return errOut;
         }
-        hospitalID.close();
 
         int inPatientCount = 0;
         int icuPatientCount = 0;
@@ -656,7 +646,6 @@ public class GraphDBEngine {
                 "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
         String queryHospitals = "SELECT FROM hospital ORDER BY id DESC";
-        String queryHospital = "SELECT FROM hospital WHERE id = ?";
 
         int inPatientCount = 0;
         int icuPatientCount = 0;
@@ -673,25 +662,24 @@ public class GraphDBEngine {
         String hospital_id = currHospital.getProperty("id");
 
         OResultSet travHosp = database.query(queryTravHosp, hospital_id);
-        OResultSet hospitalID = database.query(queryHospital, hospital_id);
 
         if(!travHosp.hasNext()){
             travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
-            if(!hospitalID.hasNext()){
-                hospitalID.close();
-                HashMap<String,String> errOut = new HashMap<String,String>();
-                errOut.put("","Hospital does not exist.");
-                return errOut;
-            } else {
-                hospitalID.close();
-                HashMap<String,String> errOut = new HashMap<String,String>();
-                errOut.put("","Hospital has no patients.");
-                return errOut;
-            }
+            HashMap<String,String> errOut = new HashMap<String,String>();
+
+            errOut.put("in-patient_count",String.valueOf("-1"));
+            errOut.put("in-patient_vax",String.valueOf("-1"));
+
+            errOut.put("icu-patient_count",String.valueOf("-1"));
+            errOut.put("icu-patient_vax",String.valueOf("-1"));
+
+            errOut.put("patient_vent_count",String.valueOf("-1"));
+            errOut.put("patient_vent_vax",String.valueOf("-1"));
+
+            return errOut;
         }
-        hospitalID.close();
 
         while (travHosp.hasNext()) {
            
@@ -749,18 +737,18 @@ public class GraphDBEngine {
 
         HashMap<String,String> hospList = new HashMap<>();
 
-        DecimalFormat percForm = new DecimalFormat("#.##");
+        DecimalFormat percForm = new DecimalFormat(".00");
 
         hospList.put("in-patient_count",String.valueOf(inPatientCount));
-        String vaccInPerc = String.valueOf(((double) vaccInPatientCount)/((double) inPatientCount));
+        double vaccInPerc = ((double) vaccInPatientCount)/((double) inPatientCount);
         hospList.put("in-patient_vax",percForm.format(vaccInPerc));
 
         hospList.put("icu-patient_count",String.valueOf(icuPatientCount));
-        String vaccIcuPerc = String.valueOf(((double) vaccIcuPatientCount)/((double) icuPatientCount));
+        double vaccIcuPerc = ((double) vaccIcuPatientCount)/((double) icuPatientCount);
         hospList.put("icu-patient_vax",percForm.format(vaccIcuPerc));
 
         hospList.put("patient_vent_count",String.valueOf(ventPatientCount));
-        String vaccVentPerc = String.valueOf(((double) vaccVentPatientCount)/((double) ventPatientCount));
+        double vaccVentPerc = ((double) vaccVentPatientCount)/((double) ventPatientCount);
         hospList.put("patient_vent_vax",percForm.format(vaccVentPerc));
 
         return hospList;

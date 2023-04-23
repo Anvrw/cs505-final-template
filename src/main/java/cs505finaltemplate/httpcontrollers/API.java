@@ -74,7 +74,12 @@ public class API {
             boolean resCEP = Launcher.cepEngine.resetDB();
 
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("reset",String.valueOf(resCEP&&resGraph));
+            if(resCEP&&resGraph){
+                responseMap.put("reset_status_code","1");
+            }else{
+                responseMap.put("reset_status_code","0");
+            }
+            
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
@@ -116,7 +121,12 @@ public class API {
         String responseString = "{}";
         try{
             Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("state_alert",String.valueOf(Launcher.alertlist.size() >= 5));
+
+            if(Launcher.alertlist.size() >= 5){
+                responseMap.put("state_status","1");
+            }else{
+                responseMap.put("state_status","0");
+            }
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
@@ -136,9 +146,9 @@ public class API {
     public Response getconfirmedcontacts(@PathParam("patient_mrn") String patientMRN) {
         String responseString = "{}";
         try{
-            Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("contactlist",Launcher.graphDBEngine.getContacts(patientMRN));
+            Map<String,List<String>> responseMap = new HashMap<>();
             responseString = gson.toJson(responseMap);
+            responseString = gson.toJson(Launcher.graphDBEngine.getContacts(patientMRN));
         }
         catch (Exception ex){
             StringWriter sw = new StringWriter();
@@ -157,9 +167,9 @@ public class API {
     public Response getpossiblecontacts(@PathParam("patient_mrn") String patientMRN) {
         String responseString = "{}";
         try{
-            Map<String,String> responseMap = new HashMap<>();
-            responseMap.put("contactlist",Launcher.graphDBEngine.getEventContacts(patientMRN));
+            Map<String,List<String>> responseMap = new HashMap<>();
             responseString = gson.toJson(responseMap);
+            responseString = gson.toJson(Launcher.graphDBEngine.getEventContacts(patientMRN));
         }
         catch (Exception ex){
             StringWriter sw = new StringWriter();
@@ -178,10 +188,28 @@ public class API {
     public Response getpatientstatus(@PathParam("hospital_id") String hospitalID) {
         String responseString = "{}";
         try{
-            if(hospitalID == "")
-                responseString = gson.toJson(Launcher.graphDBEngine.getTotalHospitalInfo());
-            else
-                responseString = gson.toJson(Launcher.graphDBEngine.getHospitalInfo(hospitalID));
+
+            responseString = gson.toJson(Launcher.graphDBEngine.getHospitalInfo(hospitalID));
+        }
+        catch (Exception ex){
+
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            String exceptionAsString = sw.toString();
+            ex.printStackTrace();
+
+            return Response.status(500).entity(exceptionAsString).build();
+        }
+        return Response.ok(responseString).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    @GET
+    @Path("/getpatientstatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getpatientstatuses(@PathParam("hospital_id") String hospitalID) {
+        String responseString = "{}";
+        try{
+            responseString = gson.toJson(Launcher.graphDBEngine.getTotalHospitalInfo());
         }
         catch (Exception ex){
 
