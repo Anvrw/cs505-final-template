@@ -61,7 +61,7 @@ public class GraphDBEngine {
     }
 
 
-
+    //Initializes database
     public void initDB(ODatabaseSession db){
         OClass patient = db.getClass("patient");
 
@@ -128,7 +128,7 @@ public class GraphDBEngine {
         }
     }
 
-        //clears the vertexs from each of the data pieces
+    //clears the vertexs from each of the data pieces
     private boolean clearDB(OrientDB orient) {
 
         try{
@@ -389,6 +389,7 @@ public class GraphDBEngine {
         setVaccine(newvaccine,database);
     }
 
+    //General input handler for all forms of json input
     public void jsoInputHandler(String message, Character type){
 
         OrientDB orient;
@@ -418,9 +419,10 @@ public class GraphDBEngine {
         orient.close();
     }
 
-    //allows for traversal through multiple datasets, amd selects and populates a JSON at the end of a patient depth scan
+    //Traverses each patient connection to a given patient and marks them down for output
     public List<String> getContacts(String patient_mrn) {
 
+        //Variable setup
         OrientDB orient;
         ODatabaseSession database;
         orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
@@ -434,6 +436,7 @@ public class GraphDBEngine {
         OResultSet traversal = database.query(queryTraversal, patient_mrn);
         OResultSet patient = database.query(queryPatient, patient_mrn);
 
+        //Error check; return empty string
         if(!traversal.hasNext()){
             traversal.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
@@ -447,6 +450,7 @@ public class GraphDBEngine {
 
         List<String> contactList = new ArrayList<>();
 
+        //traverse each patient contact node
         while (traversal.hasNext()) {
             OResult item = traversal.next();
             contactList.add(item.getProperty("patient_mrn"));
@@ -459,8 +463,11 @@ public class GraphDBEngine {
         return contactList;
     }
 
+    //Traverses each event connection to a given patient and marks down all other
+    // patients connected to it for output
     public List<String> getEventContacts(String patient_mrn) {
 
+        //Variable setup
         OrientDB orient;
         ODatabaseSession database;
         Gson gson = new Gson();
@@ -478,6 +485,7 @@ public class GraphDBEngine {
         OResultSet travPat = database.query(queryTravPat, patient_mrn);
         OResultSet patient = database.query(queryPatient, patient_mrn);
 
+        //Error check; return value 0 and an empty array mapped to it
         if(!travPat.hasNext()){
             travPat.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
@@ -492,6 +500,7 @@ public class GraphDBEngine {
         List<String> contactList = new ArrayList<>();
         DecimalFormat threeSigForm = new DecimalFormat("000");
 
+        //traverse each event contact node
         int i = 1;
         while (travPat.hasNext()) {
            
@@ -504,6 +513,7 @@ public class GraphDBEngine {
                 String eventID = patItem.getProperty("event_id");
                 OResultSet travEvent = database.query(queryTravEvent,eventID);
                 
+                //traverse each patient contact node
                 while(travEvent.hasNext()){
                     OResult patEvent = travEvent.next();
 
@@ -525,8 +535,11 @@ public class GraphDBEngine {
         return contactList;
     }
 
+    //This method receives the total number of patients in a given hospital and 
+    // calculates out the percent vaccinated, outputting both at the end
     public HashMap<String,String> getHospitalInfo(String hospital_id) {
 
+        //Variable setup
         OrientDB orient;
         ODatabaseSession database;
         orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
@@ -541,6 +554,14 @@ public class GraphDBEngine {
 
         OResultSet travHosp = database.query(queryTravHosp, hospital_id);
 
+        int inPatientCount = 0;
+        int icuPatientCount = 0;
+        int ventPatientCount = 0;
+        int vaccInPatientCount = 0;
+        int vaccIcuPatientCount = 0;
+        int vaccVentPatientCount = 0;
+
+        //Error check; If the hospital asked for doesnt exist, return -1's
         if(!travHosp.hasNext()){
             travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
@@ -560,20 +581,15 @@ public class GraphDBEngine {
             return errOut;
         }
 
-        int inPatientCount = 0;
-        int icuPatientCount = 0;
-        int ventPatientCount = 0;
-        int vaccInPatientCount = 0;
-        int vaccIcuPatientCount = 0;
-        int vaccVentPatientCount = 0;
-
         HashMap<String,String> hospList = new HashMap<>();
 
+        //Traverse each patient attached to the hospital
         while (travHosp.hasNext()) {
            
             OResult patItem = travHosp.next();
 
             if(patItem.hasProperty("patient_mrn") && patItem.getProperty("patient_mrn") != ""){
+                //Begin marking down patient status
                 int status = patItem.getProperty("patient_status");
 
                 String patID = patItem.getProperty("patient_mrn");
@@ -591,7 +607,7 @@ public class GraphDBEngine {
                 }
                 travPat.close();
 
-
+                //determine which case something is
                 switch(status+vaccStatus){
                     case 1:
                         inPatientCount+=1;
@@ -621,7 +637,9 @@ public class GraphDBEngine {
         database.close();
         orient.close();
 
-        DecimalFormat percForm = new DecimalFormat("#.##");
+        //Format output to what is desired.
+
+        DecimalFormat percForm = new DecimalFormat(".00");
 
         hospList.put("in-patient_count",String.valueOf(inPatientCount));
         String vaccInPerc = String.valueOf(((double) vaccInPatientCount)/((double) inPatientCount));
@@ -638,8 +656,11 @@ public class GraphDBEngine {
         return hospList;
     }
 
+    //This method receives the total number of patients in hospitals for all hospitals
+    // and calculates out the percent vaccinated, outputting both at the end
     public HashMap<String,String> getTotalHospitalInfo() {
 
+        //Variable setup
         OrientDB orient;
         ODatabaseSession database;
         orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
@@ -662,6 +683,7 @@ public class GraphDBEngine {
 
         OResultSet hospitals = database.query(queryHospitals, "");
 
+        //Incase of no hospitals, return -1's
         if(!hospitals.hasNext()){
             hospitals.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
@@ -680,6 +702,8 @@ public class GraphDBEngine {
             return errOut;
         }
 
+        //Traverse each hospital in the database
+
         while(hospitals.hasNext()){
         
         OResult currHospital = hospitals.next();
@@ -687,12 +711,16 @@ public class GraphDBEngine {
 
         OResultSet travHosp = database.query(queryTravHosp, hospital_id);
 
+        //Traverse each patient connected to the hospital
+
         while (travHosp.hasNext()) {
            
             OResult patItem = travHosp.next();
 
             if(patItem.hasProperty("patient_mrn") && patItem.getProperty("patient_mrn") != ""){
                 int status = patItem.getProperty("patient_status");
+
+                //Begin marking down patient status
 
                 String patID = patItem.getProperty("patient_mrn");
                 OResultSet travPat = database.query(queryTravPat,patID);
@@ -709,6 +737,7 @@ public class GraphDBEngine {
                 }
                 travPat.close();
 
+                //determine which case something is
 
                 switch(status+vaccStatus){
                     case 1:
@@ -740,6 +769,8 @@ public class GraphDBEngine {
         hospitals.close();
         database.close();
         orient.close();
+
+        //Generate the output in its correct format and decimal count
 
         HashMap<String,String> hospList = new HashMap<>();
 
