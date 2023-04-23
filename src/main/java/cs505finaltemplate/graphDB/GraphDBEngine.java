@@ -656,15 +656,8 @@ public class GraphDBEngine {
 
         OResultSet hospitals = database.query(queryHospitals, "");
 
-        while(hospitals.hasNext()){
-        
-        OResult currHospital = hospitals.next();
-        String hospital_id = currHospital.getProperty("id");
-
-        OResultSet travHosp = database.query(queryTravHosp, hospital_id);
-
-        if(!travHosp.hasNext()){
-            travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
+        if(!hospitals.hasNext()){
+            hospitals.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
             database.close();
             orient.close();
             HashMap<String,String> errOut = new HashMap<String,String>();
@@ -680,6 +673,13 @@ public class GraphDBEngine {
 
             return errOut;
         }
+
+        while(hospitals.hasNext()){
+        
+        OResult currHospital = hospitals.next();
+        String hospital_id = currHospital.getProperty("id");
+
+        OResultSet travHosp = database.query(queryTravHosp, hospital_id);
 
         while (travHosp.hasNext()) {
            
