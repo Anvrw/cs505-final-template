@@ -62,7 +62,7 @@ public class Launcher {
 
         //start message collector
         Map<String,String> message_config = new HashMap<>();
-        message_config.put("hostname","http://ajta238.cs.uky.edu"); //Fill config for your team in
+        message_config.put("hostname","ajta238.cs.uky.edu"); //Fill config for your team in
         message_config.put("port","5672"); //
         message_config.put("username","root");
         message_config.put("password","rootpwd");
