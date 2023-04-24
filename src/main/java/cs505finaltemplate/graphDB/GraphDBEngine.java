@@ -48,14 +48,7 @@ public class GraphDBEngine {
         this.databasePass = databasePass;
         OrientDB orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
         clearDB(orient);
-        ODatabaseSession db = orient.open(databaseName, databaseUsrn, databasePass);
 
-        //clearDB(db);
-
-        //create classes
-        initDB(db);
-
-        db.close();
         orient.close();
 
     }
@@ -135,7 +128,13 @@ public class GraphDBEngine {
             if(orient.exists(databaseName)){
                 orient.drop(databaseName);
             }
+            
             orient.create(databaseName, ODatabaseType.PLOCAL);
+            ODatabaseSession Database = orient.open(databaseName, databaseUsrn, databasePass)
+
+            initDB(Database);
+            Database.close();
+
             return true;
             }
         catch(Exception e){
