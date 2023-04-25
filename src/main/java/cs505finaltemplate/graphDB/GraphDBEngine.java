@@ -47,6 +47,10 @@ public class GraphDBEngine {
         this.databaseUsrn = databaseUsrn;
         this.databasePass = databasePass;
         OrientDB orient = new OrientDB(databaseLink, databaseUsrn, databasePass, OrientDBConfig.defaultConfig());
+        
+	    if(!orient.exists(databaseName))
+		    orient.create(databaseName, ODatabaseType.PLOCAL);
+
         clearDB(orient);
 
         orient.close();
@@ -120,18 +124,39 @@ public class GraphDBEngine {
             db.createEdgeClass("recipient");
         }
     }
+	
+
+
+	private void safeQuery(ODatabaseSession Database, String Query){
+		try{
+		Database.command(Query);
+		} catch(Exception e) {
+		return;
+		}
+	}
 
     //clears the vertexs from each of the data pieces
     private boolean clearDB(OrientDB orient) {
 
         try{
-            if(orient.exists(databaseName)){
-                orient.drop(databaseName);
-            }
-            
-            orient.create(databaseName, ODatabaseType.PLOCAL);
-            ODatabaseSession Database = orient.open(databaseName, databaseUsrn, databasePass)
-
+		ODatabaseSession Database = orient.open(databaseName, databaseUsrn, databasePass);
+            String query = "DELETE VERTEX FROM patient";
+            safeQuery(Database,query);
+	    query = "DELETE VERTEX FROM hospital";
+            safeQuery(Database,query);
+  	    query = "DELETE VERTEX FROM event";
+            safeQuery(Database,query);
+	    query = "DELETE VERTEX FROM vacc";
+            safeQuery(Database,query);
+	    query = "DELETE EDGE FROM contact_with";
+            safeQuery(Database,query);
+	    query = "DELETE EDGE FROM patient_at";
+            safeQuery(Database,query);
+  	    query = "DELETE EDGE FROM participant";
+            safeQuery(Database,query);
+	    query = "DELETE EDGE FROM recipient";
+            safeQuery(Database,query);
+	
             initDB(Database);
             Database.close();
 
@@ -432,6 +457,7 @@ public class GraphDBEngine {
                 "WHILE $depth <= 2";
         String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
+        try{
         OResultSet traversal = database.query(queryTraversal, patient_mrn);
         OResultSet patient = database.query(queryPatient, patient_mrn);
 
@@ -460,6 +486,14 @@ public class GraphDBEngine {
         orient.close();
 
         return contactList;
+    } catch(Exception e){
+        database.close();
+        orient.close();
+
+        List<String> errOut = new ArrayList<>();
+        errOut.add("-1");
+        return errOut;
+    }
     }
 
     //Traverses each event connection to a given patient and marks down all other
@@ -481,6 +515,7 @@ public class GraphDBEngine {
                 "WHILE $depth <= 2";
         String queryPatient = "SELECT FROM patient WHERE patient_mrn = ?";
 
+        try{
         OResultSet travPat = database.query(queryTravPat, patient_mrn);
         OResultSet patient = database.query(queryPatient, patient_mrn);
 
@@ -532,6 +567,15 @@ public class GraphDBEngine {
         orient.close();
 
         return contactList;
+
+    } catch(Exception e){
+        database.close();
+        orient.close();
+
+        List<String> errOut = new ArrayList<>();
+        errOut.add("[{000:[-1]}]");
+        return errOut;
+    }
     }
 
     //This method receives the total number of patients in a given hospital and 
@@ -550,7 +594,7 @@ public class GraphDBEngine {
         String queryTravPat = "TRAVERSE inE(), outE(), inV(), outV() " +
                 "FROM (select from patient where patient_mrn = ?) " +
                 "WHILE $depth <= 2";
-
+        try{
         OResultSet travHosp = database.query(queryTravHosp, hospital_id);
 
         int inPatientCount = 0;
@@ -635,6 +679,7 @@ public class GraphDBEngine {
         travHosp.close(); //REMEMBER TO ALWAYS CLOSE THE RESULT SET!!!
         database.close();
         orient.close();
+    
 
         //Format output to what is desired.
 
@@ -653,6 +698,23 @@ public class GraphDBEngine {
         hospList.put("patient_vent_vax",percForm.format(vaccVentPerc));
 
         return hospList;
+    }catch(Exception e){
+        database.close();
+        orient.close();
+
+        HashMap<String,String> errOut = new HashMap<String,String>();
+
+        errOut.put("in-patient_count",String.valueOf("-1"));
+        errOut.put("in-patient_vax",String.valueOf("-1"));
+
+        errOut.put("icu-patient_count",String.valueOf("-1"));
+        errOut.put("icu-patient_vax",String.valueOf("-1"));
+
+        errOut.put("patient_vent_count",String.valueOf("-1"));
+        errOut.put("patient_vent_vax",String.valueOf("-1"));
+
+        return errOut;
+    }
     }
 
     //This method receives the total number of patients in hospitals for all hospitals
@@ -673,6 +735,7 @@ public class GraphDBEngine {
                 "WHILE $depth <= 2";
         String queryHospitals = "SELECT FROM hospital ORDER BY id DESC";
 
+        try{
         int inPatientCount = 0;
         int icuPatientCount = 0;
         int ventPatientCount = 0;
@@ -788,6 +851,22 @@ public class GraphDBEngine {
         hospList.put("patient_vent_vax",percForm.format(vaccVentPerc));
 
         return hospList;
+    } catch(Exception e){
+        database.close();
+        orient.close();
+        HashMap<String,String> errOut = new HashMap<String,String>();
+
+        errOut.put("in-patient_count",String.valueOf("-1"));
+        errOut.put("in-patient_vax",String.valueOf("-1"));
+
+        errOut.put("icu-patient_count",String.valueOf("-1"));
+        errOut.put("icu-patient_vax",String.valueOf("-1"));
+
+        errOut.put("patient_vent_count",String.valueOf("-1"));
+        errOut.put("patient_vent_vax",String.valueOf("-1"));
+
+        return errOut;
+    }
     }
     
 }

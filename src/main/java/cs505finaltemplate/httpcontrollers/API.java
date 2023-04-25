@@ -100,7 +100,14 @@ public class API {
         String responseString = "{}";
         try{
             Map<String,List<String>> responseMap = new HashMap<>();
-            responseMap.put("ziplist",Launcher.alertlist);
+            if(Launcher.alertlist.size() < 1){
+                List<String> temp = new ArrayList<String>();
+                temp.add("-1")
+                responseMap.put("ziplist",temp);
+            }
+            else{
+                responseMap.put("ziplist",Launcher.alertlist);
+            }
             responseString = gson.toJson(responseMap);
         }
         catch (Exception ex){
